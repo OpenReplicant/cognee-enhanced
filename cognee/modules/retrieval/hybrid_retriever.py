@@ -92,6 +92,7 @@ class HybridRetriever(BaseRetriever):
         rerank_top_n: int | None = None,
         rerank_model: str | None = None,
         chunk_lane_weights: tuple[float, float, float] | None = None,
+        ppr_lane: bool = False,
     ):
         self.chunks_top_k = chunks_top_k if chunks_top_k is not None else 5
         self.entities_top_k = entities_top_k if entities_top_k is not None else 5
@@ -126,6 +127,9 @@ class HybridRetriever(BaseRetriever):
         # Opt-in: per-lane RRF weights for the chunk lane as (dense chunk, dense
         # summary, lexical); None weighs them equally (enhanced/HYPOTHESES.md H2).
         self.chunk_lane_weights = tuple(chunk_lane_weights) if chunk_lane_weights else None
+        # Opt-in: Personalized PageRank over the entity-chunk graph as a fourth
+        # chunk-lane RRF input (enhanced/HYPOTHESES.md H6).
+        self.ppr_lane = ppr_lane
 
     def _use_session_cache(self) -> bool:
         user = session_user.get()
@@ -205,6 +209,7 @@ class HybridRetriever(BaseRetriever):
                 collections=chunk_collections(include_dlt),
                 lexical_lane=self.lexical_lane,
                 lane_weights=self.chunk_lane_weights,
+                ppr_lane=self.ppr_lane,
             ),
             self._retrieve_entities_and_facts(query, query_vector, include_dlt),
         )

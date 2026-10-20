@@ -85,11 +85,26 @@ def add_lexical_ranks(
         rank += 1
 
 
+def add_ppr_ranks(pairs: list[dict], chunk_ids: list[str]) -> None:
+    """Record each chunk's rank in the PPR lane on its pair (see ``add_lexical_ranks``)."""
+    for rank, chunk_id in enumerate(chunk_ids or []):
+        pair = _find_chunk_summary_pair(pairs, chunk_id, None)
+        if pair is None:
+            pair = _new_chunk_summary_pair(chunk_id=chunk_id)
+            pairs.append(pair)
+        if pair.get("ppr_rank") is None:
+            pair["ppr_rank"] = rank
+
+
 def source_chunk_ids_to_load(pairs: list[dict]) -> list[str]:
     return [
         pair["chunk_id"]
         for pair in pairs
-        if (pair["summary_rank"] is not None or pair["lexical_rank"] is not None)
+        if (
+            pair["summary_rank"] is not None
+            or pair["lexical_rank"] is not None
+            or pair.get("ppr_rank") is not None
+        )
         and pair["chunk"] is None
         and pair["chunk_id"]
     ]
@@ -150,4 +165,5 @@ def _new_chunk_summary_pair(
         "vector_rank": None,
         "summary_rank": None,
         "lexical_rank": None,
+        "ppr_rank": None,
     }

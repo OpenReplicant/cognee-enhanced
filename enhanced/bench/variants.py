@@ -54,6 +54,29 @@ VARIANTS = {
         },
         "env": {},
     },
+    # H6: hybrid + Personalized PageRank chunk lane (fourth RRF input).
+    "hybrid_ppr": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": DEPTH,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "ppr_lane": True,
+        },
+        "env": {},
+    },
+    # H6 on top of H1: dense chunk + dense summary + BM25 + PPR.
+    "hybrid_bm25_ppr": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": DEPTH,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "lexical_lane": True,
+            "ppr_lane": True,
+        },
+        "env": {},
+    },
     # Ablation: hybrid without the dense summary lane.
     "hybrid_nosum": {
         "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",

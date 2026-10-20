@@ -1,6 +1,7 @@
 import pytest
 
 from cognee.modules.retrieval.hybrid import chunks as hybrid_chunks
+from cognee.modules.retrieval.hybrid import graph_cache
 from cognee.modules.retrieval.hybrid.pairs import (
     add_lexical_ranks,
     chunk_summary_pairs,
@@ -107,8 +108,8 @@ def lexical_env(monkeypatch):
     _Index.built = 0
     monkeypatch.setattr(graph_pkg, "get_graph_engine", get_graph_engine)
     monkeypatch.setattr(bm25_retriever, "BM25ChunksRetriever", _Index)
-    monkeypatch.setattr(hybrid_chunks, "_lexical_indexes", hybrid_chunks.OrderedDict())
-    monkeypatch.setattr(hybrid_chunks, "_graph_key", lambda: graph.key)
+    graph_cache.clear()
+    monkeypatch.setattr(graph_cache, "graph_key", lambda: graph.key)
     return graph
 
 
@@ -132,7 +133,7 @@ async def test_lexical_index_is_rebuilt_when_the_graph_changes(lexical_env):
 @pytest.mark.asyncio
 async def test_lexical_index_is_rebuilt_after_the_ttl(lexical_env, monkeypatch):
     await hybrid_chunks.search_lexical("q", 5)
-    monkeypatch.setattr(hybrid_chunks, "LEXICAL_INDEX_TTL_SECONDS", -1.0)
+    monkeypatch.setattr(graph_cache, "TTL_SECONDS", -1.0)
     await hybrid_chunks.search_lexical("q", 5)
 
     assert _Index.built == 2
@@ -160,22 +161,22 @@ async def test_lexical_index_is_per_database(lexical_env):
 
 @pytest.mark.asyncio
 async def test_lexical_index_cache_is_bounded(lexical_env, monkeypatch):
-    monkeypatch.setattr(hybrid_chunks, "LEXICAL_INDEX_MAX_ENTRIES", 2)
+    monkeypatch.setattr(graph_cache, "MAX_ENTRIES", 2)
     for key in ("a", "b", "c"):
         lexical_env.key = key
         await hybrid_chunks.search_lexical("q", 5)
 
-    assert list(hybrid_chunks._lexical_indexes) == ["b", "c"]
+    assert list(graph_cache._caches["lexical"]) == ["b", "c"]
 
 
 def test_graph_key_follows_the_graph_context_config(monkeypatch):
     from cognee.infrastructure.databases.graph import config as graph_config
 
     monkeypatch.setattr(graph_config, "get_graph_context_config", lambda: {"path": "/a"})
-    first = hybrid_chunks._graph_key()
+    first = graph_cache.graph_key()
     monkeypatch.setattr(graph_config, "get_graph_context_config", lambda: {"path": "/b"})
 
-    assert hybrid_chunks._graph_key() != first
+    assert graph_cache.graph_key() != first
 
 
 def test_lane_weights_scale_each_lanes_rrf_term():

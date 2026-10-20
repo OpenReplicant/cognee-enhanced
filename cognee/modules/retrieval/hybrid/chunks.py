@@ -1,8 +1,4 @@
 import asyncio
-import hashlib
-import json
-import time
-from collections import OrderedDict
 from collections.abc import Iterable
 from itertools import chain
 from typing import Any
@@ -10,8 +6,10 @@ from typing import Any
 from cognee.infrastructure.databases.vector.exceptions import CollectionNotFoundError
 from cognee.modules.chunking.models.DltRow import DltRow
 from cognee.modules.chunking.models.DocumentChunk import DocumentChunk
+from cognee.modules.retrieval.hybrid import graph_cache
 from cognee.modules.retrieval.hybrid.pairs import (
     add_lexical_ranks,
+    add_ppr_ranks,
     attach_source_chunks,
     chunk_summary_pairs,
     source_chunk_ids_to_load,
@@ -55,11 +53,13 @@ async def retrieve_hybrid_chunks(
     collections: tuple[str, ...] = chunk_collections(include_dlt_rows=False),
     lexical_lane: bool = False,
     lane_weights: tuple[float, float, float] | None = None,
+    ppr_lane: bool = False,
 ) -> dict[str, Any]:
     candidate_limit = chunk_candidate_limit(chunks_top_k)
     summary_limit = summary_candidate_limit(chunks_top_k, text_summaries_top_k)
     lexical_limit = candidate_limit if lexical_lane else 0
-    vector_chunks, summary_hits, lexical_hits = await asyncio.gather(
+    ppr_limit = candidate_limit if ppr_lane else 0
+    vector_chunks, summary_hits, lexical_hits, ppr_chunk_ids = await asyncio.gather(
         search_collections(
             vector_engine,
             collections,
@@ -79,6 +79,9 @@ async def retrieve_hybrid_chunks(
             query_vector=query_vector,
         ),
         search_lexical(query, lexical_limit),
+        _search_ppr(
+            vector_engine, query, ppr_limit, node_name, node_name_filter_operator, query_vector
+        ),
     )
 
     pairs = chunk_summary_pairs(
@@ -88,6 +91,7 @@ async def retrieve_hybrid_chunks(
         node_name_filter_operator,
     )
     add_lexical_ranks(pairs, lexical_hits, node_name, node_name_filter_operator)
+    add_ppr_ranks(pairs, ppr_chunk_ids)
     missing_source_chunk_ids = source_chunk_ids_to_load(pairs)
     if missing_source_chunk_ids:
         source_chunks = await load_source_chunks_for_summaries(
@@ -124,53 +128,37 @@ async def retrieve_hybrid_chunks(
     }
 
 
-# One BM25 index per graph database, reused while the graph's node and edge
-# counts are unchanged and the entry is younger than the TTL (the TTL covers an
-# edit that leaves both counts equal). Keyed by a hash of the graph context
-# config, which is what identifies the database (``get_graph_engine`` returns
-# a fresh handle per call); a small LRU bounds the memory.
-LEXICAL_INDEX_TTL_SECONDS = 300.0
-LEXICAL_INDEX_MAX_ENTRIES = 16
-_lexical_indexes: "OrderedDict[str, tuple]" = OrderedDict()
+async def _search_ppr(
+    vector_engine: Any,
+    query: str,
+    limit: int,
+    node_name: list[str] | None,
+    node_name_filter_operator: str,
+    query_vector: list[float] | None,
+) -> list[str]:
+    """PPR lane (H6): seed entities by vector search, rank chunks by PPR mass."""
+    if limit <= 0:
+        return []
+    # Imported here: entities.py imports this module.
+    from cognee.modules.retrieval.hybrid.entities import search_entities
+    from cognee.modules.retrieval.hybrid.ppr import SEED_ENTITIES, search_ppr
+
+    entity_hits = await search_entities(
+        vector_engine, query, SEED_ENTITIES, node_name, node_name_filter_operator, query_vector
+    )
+    return await search_ppr(entity_hits, limit)
 
 
-def _graph_key() -> str:
-    from cognee.infrastructure.databases.graph.config import get_graph_context_config
+async def _build_lexical_index(graph_engine):
+    from cognee.modules.retrieval.bm25_retriever import BM25ChunksRetriever
 
-    config = json.dumps(get_graph_context_config(), sort_keys=True, default=str)
-    return hashlib.sha256(config.encode()).hexdigest()
+    index = BM25ChunksRetriever(with_scores=True)
+    await index.initialize()
+    return index
 
 
 async def _lexical_index():
-    from cognee.infrastructure.databases.graph import get_graph_engine
-    from cognee.modules.retrieval.bm25_retriever import BM25ChunksRetriever
-
-    key = _graph_key()
-    graph_engine = await get_graph_engine()
-    try:
-        counts = await graph_engine.get_graph_counts()
-    except Exception:
-        # Cannot tell whether the graph changed, so never reuse an index.
-        logger.info("Graph counts unavailable; lexical index not cached", exc_info=True)
-        counts = None
-    entry = _lexical_indexes.get(key)
-    now = time.monotonic()
-    if (
-        entry is not None
-        and counts is not None
-        and entry[0] == counts
-        and now - entry[1] < LEXICAL_INDEX_TTL_SECONDS
-    ):
-        _lexical_indexes.move_to_end(key)
-        return entry[2]
-    index = BM25ChunksRetriever(with_scores=True)
-    await index.initialize()
-    if counts is not None:
-        _lexical_indexes[key] = (counts, now, index)
-        _lexical_indexes.move_to_end(key)
-        while len(_lexical_indexes) > LEXICAL_INDEX_MAX_ENTRIES:
-            _lexical_indexes.popitem(last=False)
-    return index
+    return await graph_cache.cached_for_graph("lexical", _build_lexical_index)
 
 
 async def search_lexical(query: str, limit: int) -> list[tuple[dict, float]]:

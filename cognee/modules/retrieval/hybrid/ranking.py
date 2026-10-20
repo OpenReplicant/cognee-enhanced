@@ -22,7 +22,8 @@ def rank_chunk_summary_pairs(
     """
     if limit <= 0:
         return []
-    weights = lane_weights or (1.0, 1.0, 1.0)
+    # The optional PPR lane (H6) always weighs 1.0.
+    weights = tuple(lane_weights or (1.0, 1.0, 1.0)) + (1.0,)
 
     rrf_k = _rrf_k(limit)
     ranked = []
@@ -31,7 +32,12 @@ def rank_chunk_summary_pairs(
         if chunk is None:
             continue
 
-        lane_ranks = (pair["vector_rank"], pair["summary_rank"], pair.get("lexical_rank"))
+        lane_ranks = (
+            pair["vector_rank"],
+            pair["summary_rank"],
+            pair.get("lexical_rank"),
+            pair.get("ppr_rank"),
+        )
         weighted = [(weight, rank) for weight, rank in zip(weights, lane_ranks) if rank is not None]
         ranks = [rank for _, rank in weighted]
         if not ranks:
