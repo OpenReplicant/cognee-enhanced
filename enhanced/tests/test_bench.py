@@ -52,3 +52,12 @@ def test_text_of_handles_retriever_shapes():
     assert _text_of({"text": "a"}) == "a"
     assert _text_of({"payload": {"text": "b"}}) == "b"
     assert _text_of((_Scored(), 0.3)) == "hello"
+
+
+def test_within_budget_stops_at_the_first_overflowing_window():
+    from enhanced.bench.budget import within_budget
+
+    tokens = {1: 400, 2: 700, 3: 100}
+    assert within_budget([1, 2, 3], tokens, 1000) == ([1], 400)
+    assert within_budget([1, 3, 2], tokens, 1200) == ([1, 3, 2], 1200)
+    assert within_budget([], tokens, 1000) == ([], 0)

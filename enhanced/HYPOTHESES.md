@@ -164,6 +164,18 @@ Gaps confirmed in the code (v1.6.5):
   tokens per query at matched recall@10. The harness needs a token-count field
   for this.
 - **Prediction:** at matched recall, ≥25% fewer context tokens.
+- **Tooling:** `bench/budget.py` computes recall at 1k / 2k / 4k passage
+  tokens offline from any committed result (cl100k counts from the stores).
+  Baselines on the haiku test split (`H1-test-haiku.json`):
+
+  | variant | R@1k tok | R@2k tok | R@4k tok |
+  |---|---:|---:|---:|
+  | hybrid | 0.615 | 0.732 | 0.830 |
+  | hybrid_bm25 (H1) | 0.689 | 0.792 | 0.882 |
+  | bm25 only | 0.752 | 0.808 | 0.864 |
+
+  The full top-20 context is about 6.5k passage tokens. The open question
+  is whether answers hold up when it is cut to ~2-4k by a score-gap rule.
 
 ### H5: A learned query router beats fixed hybrid
 - **Status:** proposed (needs ≥3 accepted or measured variants first)
