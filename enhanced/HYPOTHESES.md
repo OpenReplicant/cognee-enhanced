@@ -242,17 +242,34 @@ Gaps confirmed in the code (v1.6.5):
   questions where variants tie.
 
 ### H6: A Personalized PageRank lane helps multi-hop
-- **Status:** proposed
-- **Claim:** A PPR lane (seeded by entities the query matches, run over the
-  entity–chunk graph, ranking chunks by PPR mass) fused into hybrid raises
-  `all@10` on multi-hop questions without hurting single-hop.
+- **Status:** registered
+- **Claim:** A PPR lane fused into hybrid's chunk RRF raises `all@10` on
+  multi-hop questions without hurting single-hop. The lane seeds on the
+  entities the query matches, runs over the entity–chunk graph, and ranks
+  chunks by PPR mass.
 - **Why:** HippoRAG 2 (Gutiérrez et al. 2025) reports about +7 pt over the
   best dense retriever on associative multi-hop tasks, with no loss on factual
-  QA. Cognee already stores both chunk and entity nodes, so the graph exists.
-- **Metric:** all@10 on multi_hop (primary); recall@5 overall as a guard.
-- **Prediction:** +4 pt all@10 multi_hop on LoCoMo; larger on MuSiQue/2Wiki
-  (T0b). Under the keyless graph the effect may be small. Run T1 before
-  rejecting.
+  QA. Every lane so far ranks passages by similarity to the question; PPR
+  spreads relevance through cognee's own graph, so it can reach a passage
+  that shares no words with the question. So far only reranking (H3) has
+  helped multi_hop; lane weighting (H2/H2b) hurt it.
+- **Design (fixed before running; HippoRAG defaults, no tuning):**
+  - graph = DocumentChunk, Entity and Timestamp nodes with every edge among
+    them, undirected (EntityType, TextDocument and TextSummary are left
+    out: type nodes are hubs that leak mass);
+  - seeds = the top 10 `Entity_name` vector hits, weighted 1/(rank+1);
+  - damping 0.5;
+  - chunks ranked by PPR score, top 2×`chunks_top_k`, as a fourth input
+    to the chunk-lane RRF (weight 1);
+  - the graph is cached per database like the BM25 index.
+- **Variants:** `hybrid_bm25_ppr` vs `hybrid_bm25` (primary), and
+  `hybrid_ppr` vs `hybrid`. A dev run (convs 0-4) is allowed for debugging
+  only.
+- **Metric:** multi_hop all@10 (primary); overall recall@5 and per-category
+  regressions as guards; p95 latency.
+- **Prediction:** multi_hop all@10 +4 pt on the haiku test split; overall
+  recall@5 not significantly lower; p95 +≤100 ms. Larger effects expected
+  on MuSiQue / 2Wiki (T0b).
 
 ### H7: Fact-augmented index keys help multi-hop and temporal
 - **Status:** proposed
