@@ -228,9 +228,101 @@ async def qa(args) -> None:
     print(f"answered conv {args.conv} variant {args.variant}: {len(rows)} questions")
 
 
+async def lanes(args) -> None:
+    """Dump each question's chunk-lane candidates with their per-lane ranks.
+
+    Uses the hybrid chunk lane's own search helpers and pair builders, so
+    ``bench/tune_lanes.py`` can re-run the real fusion
+    (``rank_chunk_summary_pairs``) offline for any lane weights. Depth matches
+    ``VARIANTS["hybrid_bm25"]``.
+    """
+    from cognee.infrastructure.databases.unified import get_unified_engine
+    from cognee.modules.retrieval.hybrid import chunks as lane
+    from cognee.modules.retrieval.hybrid.pairs import add_lexical_ranks, chunk_summary_pairs
+    from cognee.modules.retrieval.utils.results import payload as payload_of
+
+    meta = json.loads(Path(args.store, "ingest_meta.json").read_text())
+    window_map = meta["windows"]
+    by_text = {_norm(w["text"]): i for i, w in enumerate(window_map)}
+    by_text[_norm(meta["overview_text"])] = OVERVIEW
+
+    def window_of(text: str):
+        key = _norm(text)
+        if key in by_text:
+            return by_text[key]
+        for known, index in by_text.items():
+            if key and (key in known or known in key):
+                return index
+        return None
+
+    depth = VARIANTS["hybrid_bm25"]["kwargs"]["chunks_top_k"]
+    engine = await get_unified_engine()
+    vector = engine.vector
+    index = await lane._lexical_index()
+    chunk_window = {cid: window_of(p.get("text", "")) for cid, p in index.payloads.items()}
+    include_dlt = await lane.dlt_rows_indexed(vector)
+
+    adapter = _adapter(meta["max_sessions"])
+    conversation = adapter.load_conversation(args.conv)
+    with open(args.out, "w") as out:
+        for q in adapter.questions_for(conversation):
+            query_vector = (await vector.embedding_engine.embed_text([q["question"]]))[0]
+            dense, summaries, lexical = await asyncio.gather(
+                lane.search_collections(
+                    vector,
+                    lane.chunk_collections(include_dlt),
+                    q["question"],
+                    lane.chunk_candidate_limit(depth),
+                    None,
+                    "OR",
+                    query_vector=query_vector,
+                ),
+                lane.search_collection(
+                    vector,
+                    "TextSummary_text",
+                    q["question"],
+                    lane.summary_candidate_limit(depth, None),
+                    None,
+                    "OR",
+                    query_vector=query_vector,
+                ),
+                lane.search_lexical(q["question"], lane.chunk_candidate_limit(depth)),
+            )
+            pairs = chunk_summary_pairs(dense, summaries)
+            add_lexical_ranks(pairs, lexical)
+            candidates = []
+            for pair in pairs:
+                chunk_payload = payload_of(pair["chunk"]) if pair["chunk"] is not None else {}
+                importance = chunk_payload.get("importance_weight")
+                if importance is None:
+                    importance = index.payloads.get(pair["chunk_id"], {}).get("importance_weight")
+                candidates.append(
+                    {
+                        "id": pair["chunk_id"],
+                        "window": chunk_window.get(pair["chunk_id"]),
+                        "v": pair["vector_rank"],
+                        "s": pair["summary_rank"],
+                        "l": pair["lexical_rank"],
+                        "imp": importance,
+                    }
+                )
+            out.write(
+                json.dumps(
+                    {
+                        "qid": f"conv{args.conv}:{q['question_idx']}",
+                        "category": q["question_type"],
+                        "gold": gold_windows(q["evidence"], window_map),
+                        "candidates": candidates,
+                    }
+                )
+                + "\n"
+            )
+    print(f"lanes conv {args.conv}: {len(adapter.questions_for(conversation))} questions")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["ingest", "retrieve", "qa"])
+    parser.add_argument("command", choices=["ingest", "retrieve", "qa", "lanes"])
     parser.add_argument("--conv", type=int, required=True)
     parser.add_argument("--store", required=True)
     parser.add_argument("--max-sessions", type=int, default=None)
@@ -238,7 +330,7 @@ def main() -> None:
     parser.add_argument("--out")
     parser.add_argument("--qids", help="qa: JSON list of qids to answer")
     args = parser.parse_args()
-    commands = {"ingest": ingest, "retrieve": retrieve, "qa": qa}
+    commands = {"ingest": ingest, "retrieve": retrieve, "qa": qa, "lanes": lanes}
     asyncio.run(commands[args.command](args))
 
 

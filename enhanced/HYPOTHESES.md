@@ -107,7 +107,18 @@ Gaps confirmed in the code (v1.6.5):
   BM25 without summaries reached 0.806 R@5 / 0.714 MRR, the best of every
   variant tried. Keyless summaries are assembled from GLiNER extractions, so
   this may not hold for LLM-written summaries. That is the open question.
+- **Procedure:** `bench/tune_lanes.py` dumps each dev question's chunk-lane
+  candidates with their dense / summary / lexical ranks, then grid-searches
+  weights (dense, summary) ∈ {0, .25, .5, .75, 1, 1.5, 2, 3}², lexical fixed
+  at 1 (RRF order is scale-invariant), maximising recall@5 on **dev
+  (conversations 0-4)** through the real `rank_chunk_summary_pairs`.
+  Equal-weight offline fusion reproduced all 158 committed `hybrid_bm25`
+  rankings on conv 5. The best dev weights then run through the real
+  retriever (`HybridRetriever(lexical_lane=True, chunk_lane_weights=...)`) on
+  the test split against `hybrid_bm25`, once per profile.
 - **Metric:** recall@5 on test split (conversations 5-9).
+- **Prediction (haiku):** +1 pt recall@5 over H1's equal weights, with the
+  lexical weight above both dense weights (from the BM25-alone result).
 - **Prediction (keyless):** summary-lane weight tuned on convs 0-4 ends below
   0.5, and `hybrid_bm25_nosum` beats `hybrid` by ≥5 pt R@5 on 5-9.
   **Prediction (llm, T1):** the tuned summary weight stays ≥0.5. If it does,
