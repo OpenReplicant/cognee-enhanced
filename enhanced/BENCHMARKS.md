@@ -84,3 +84,29 @@ uv run python -m enhanced.bench.compare \
 index is cached instead of rebuilt from every chunk on each query, and (2) the
 keyless test split agrees. Side findings: LLM summaries help (H2), and BM25
 alone beats every equal-weight fusion (H2 lane weights).
+
+## 2026-10-20 · H1 answer accuracy (T1) · haiku · convs 5-9
+
+150 questions (30 per test conversation, seed 0; open_domain and upstream's
+audited-corrupt golds left out). Haiku answers through each variant's own
+completion path (upstream `unified.txt`) and judges with upstream's LoCoMo judge
+prompt, via the proxy. Code at `94ee8d1cb`; the hybrid_bm25 workers for convs
+5-8 ran the pre-cache lexical lane and conv 9 the cached one (rankings verified
+identical on conv 5). File: `results/locomo-qa/H1-qa-haiku.json`.
+
+| category | n | hybrid | hybrid_bm25 |
+|---|---:|---:|---:|
+| adversarial | 29 | 0.207 | 0.379 |
+| temporal | 30 | 0.533 | 0.600 |
+| multi_hop | 23 | 0.826 | 0.826 |
+| single_hop | 68 | 0.838 | 0.779 |
+| **all** | 150 | **0.653** | **0.673** |
+
+Delta +0.020 [−0.047, +0.087]; 14 wins, 11 losses. Absolute accuracy is not
+comparable with upstream's 0.907 (Haiku answering and judging, bge-small
+embeddings, 20-chunk context).
+
+**Decision:** H1's retrieval gain is not shown to reach answers. Most
+single-hop losses keep the gold window at rank 1 but add same-person
+distractor windows, so the default stays off until a precision fix is tested
+on answers.

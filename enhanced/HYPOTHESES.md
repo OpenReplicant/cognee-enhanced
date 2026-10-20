@@ -75,6 +75,15 @@ Gaps confirmed in the code (v1.6.5):
   single_hop (+9.6); no category regresses (multi_hop MRR −0.1 [−5.7, +5.4]);
   p95 latency 0.317 → 0.351 s (+34 ms). Every criterion met. File:
   `results/locomo/H1-test-haiku.json`.
+- **Answer accuracy (T1, haiku answers and judge, 150 test questions):**
+  0.653 → 0.673, +2.0 pt [−4.7, +8.7], 14 wins / 11 losses, so not
+  established. Mixed by category: adversarial 0.21 → 0.38, temporal
+  0.53 → 0.60, multi_hop flat, single_hop 0.84 → 0.78. In 6 of 8 single-hop
+  losses the gold window is rank 1 under *both* variants; the BM25 context adds
+  keyword-matching windows about the same person's other activities, and the
+  answerer picks one. Recall at depth 20 rose and precision of the context
+  fell. Hence the default stays off until a precision fix (H3 rerank, H4
+  budget) is tested on answers. File: `results/locomo-qa/H1-qa-haiku.json`.
 
 ### H1b: Keyless retrieval should fuse BM25 with dense chunks
 - **Status:** registered
