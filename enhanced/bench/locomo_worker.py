@@ -5,6 +5,8 @@ extractor, embeddings) before this module imports cognee.
 
     python -m enhanced.bench.locomo_worker ingest   --conv 0 --store DIR [--max-sessions N]
     python -m enhanced.bench.locomo_worker retrieve --conv 0 --store DIR --variant hybrid --out F
+    python -m enhanced.bench.locomo_worker qa --conv 0 --store DIR --variant hybrid \
+        --qids F.json --out F
 
 Ingestion mirrors ``cognee/eval_framework/locomo/ingest.py`` (overview + one
 document per 6-turn window, chunk_size 4096 so each window is one chunk) but
@@ -169,16 +171,75 @@ async def retrieve(args) -> None:
     print(f"retrieved conv {args.conv} variant {args.variant}: {len(questions)} questions")
 
 
+QA_PROMPT_PATH = (
+    Path(__file__).resolve().parents[2] / "cognee/eval_framework/locomo/qa_prompts/unified.txt"
+)
+
+
+async def qa(args) -> None:
+    """Answer the selected questions through the variant's own completion path.
+
+    Mirrors upstream's LoCoMo answering: the retriever builds its context and
+    answers with ``qa_prompts/unified.txt`` as the system prompt, using
+    whichever LLM the process env configures (the proxy, see ``ANSWER_ENV``).
+    """
+    wanted = set(json.loads(Path(args.qids).read_text()))
+    spec = VARIANTS[args.variant]
+    module_name, class_name = spec["retriever"].split(":")
+    retriever = getattr(importlib.import_module(module_name), class_name)(
+        **spec["kwargs"], system_prompt=QA_PROMPT_PATH.read_text(encoding="utf-8")
+    )
+    adapter = _adapter(json.loads(Path(args.store, "ingest_meta.json").read_text())["max_sessions"])
+    conversation = adapter.load_conversation(args.conv)
+    questions = [
+        q
+        for q in adapter.questions_for(conversation)
+        if f"conv{args.conv}:{q['question_idx']}" in wanted
+    ]
+
+    async def answer_one(q):
+        retrieved = await retriever.get_retrieved_objects(q["question"])
+        context = await retriever.get_context_from_objects(
+            query=q["question"], retrieved_objects=retrieved
+        )
+        completion = await retriever.get_completion_from_context(
+            query=q["question"], retrieved_objects=retrieved, context=context
+        )
+        answer = completion[0] if isinstance(completion, list) and completion else completion
+        return {
+            "qid": f"conv{args.conv}:{q['question_idx']}",
+            "category": q["question_type"],
+            "question": q["question"],
+            "gold": q["answer"],
+            "adversarial_answer": q.get("adversarial_answer"),
+            "answer": answer if isinstance(answer, str) else json.dumps(answer, default=str),
+            "context_chars": len(context) if isinstance(context, str) else None,
+        }
+
+    semaphore = asyncio.Semaphore(4)
+
+    async def bounded(q):
+        async with semaphore:
+            return await answer_one(q)
+
+    rows = await asyncio.gather(*(bounded(q) for q in questions))
+    with open(args.out, "w") as out:
+        out.writelines(json.dumps(row) + "\n" for row in rows)
+    print(f"answered conv {args.conv} variant {args.variant}: {len(rows)} questions")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["ingest", "retrieve"])
+    parser.add_argument("command", choices=["ingest", "retrieve", "qa"])
     parser.add_argument("--conv", type=int, required=True)
     parser.add_argument("--store", required=True)
     parser.add_argument("--max-sessions", type=int, default=None)
     parser.add_argument("--variant", default="hybrid")
     parser.add_argument("--out")
+    parser.add_argument("--qids", help="qa: JSON list of qids to answer")
     args = parser.parse_args()
-    asyncio.run(ingest(args) if args.command == "ingest" else retrieve(args))
+    commands = {"ingest": ingest, "retrieve": retrieve, "qa": qa}
+    asyncio.run(commands[args.command](args))
 
 
 if __name__ == "__main__":

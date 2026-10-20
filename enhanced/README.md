@@ -56,7 +56,7 @@ that defaults to upstream behaviour until the hypothesis is accepted.
 | T0b | LongMemEval-S session recall; MuSiQue / 2Wiki supporting-paragraph recall (multi-hop) | no | planned |
 | M | Micro-benchmarks for one component (entity-resolution P/R, injection leakage, token cost) | varies | per hypothesis |
 | T1r | T0's retrieval metrics on an **LLM-built** store (`haiku` profile) | ingest only | ready |
-| T1 | QA accuracy (answer + LLM judge) on a fixed subset, cached responses | yes | planned (Haiku via the proxy) |
+| T1 | LoCoMo answer accuracy: each variant answers through its own completion path (upstream `unified.txt` prompt), upstream's judge prompt grades; Haiku for both via the proxy; fixed sample of 30 questions per test conversation (no open_domain, no audited-corrupt golds) | yes | ready (`bench/qa.py`) |
 | T2 | Upstream full LoCoMo / BEAM evals (`cognee/eval_framework/`) | yes, paid | out of budget |
 
 T0 is cheap, deterministic, and measures what most retrieval hypotheses change.
@@ -84,6 +84,17 @@ tokens per window, so a full LoCoMo store is about 10M tokens (about $2.60 at
 Haiku list price) and about 2 hours at concurrency 4. Usage is logged to
 `.cache/llm_proxy/haiku/usage.jsonl`. These calls count against the Claude
 plan the session runs under.
+
+### How T1 works
+
+```bash
+uv run python -m enhanced.bench.qa --name H1-qa --variants hybrid,hybrid_bm25 --profile haiku
+```
+
+The answering LLM is set by `ANSWER_ENV` on top of the store's profile, so a
+keyless store and a haiku store are answered by the same model. Absolute
+accuracy isn't comparable with upstream's published 0.907 (different answer
+and judge models); deltas between variants in one run are.
 
 ### How T0 works
 

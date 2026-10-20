@@ -31,6 +31,17 @@ _COMMON = {
     "IMPROVE_AUTO_ENABLED": "false",
 }
 
+# The answering LLM for QA runs (T1): Claude via the local proxy. Applied on
+# top of any profile, so answers on a keyless store and on a haiku store come
+# from the same model; it is read only at query time.
+ANSWER_ENV = {
+    "LLM_PROVIDER": "custom",
+    "LLM_MODEL": "openai/haiku",
+    "LLM_ENDPOINT": "http://127.0.0.1:8765/v1",
+    "LLM_API_KEY": "local-proxy",
+    "LLM_INSTRUCTOR_MODE": "json_mode",
+}
+
 PROFILES = {
     # Fully local, no network after model download: GLiNER graph + bge-small.
     # Deterministic and free; the graph is weaker than an LLM-built one, so
