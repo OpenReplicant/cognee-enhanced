@@ -11,6 +11,7 @@ Each conversation x variant runs in its own subprocess under the profile env.
 import argparse
 import datetime
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -47,28 +48,35 @@ def _git(*args) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=True, help="result file name, e.g. H1-baseline")
-    parser.add_argument("--variants", required=True)
+    parser.add_argument("--variants", default="")
     parser.add_argument("--convs", default="0-9")
     parser.add_argument("--profile", default="keyless")
     parser.add_argument("--max-sessions", type=int, default=None)
+    parser.add_argument("--ingest-only", action="store_true", help="build missing stores only")
     args = parser.parse_args()
 
-    variants = args.variants.split(",")
+    variants = args.variants.split(",") if args.variants else []
     unknown = [v for v in variants if v not in VARIANTS]
     if unknown:
         parser.error(f"unknown variants {unknown}; known: {sorted(VARIANTS)}")
 
     unit_suffix = f"_s{args.max_sessions}" if args.max_sessions else ""
     run_dir = CACHE_DIR / "runs" / args.name
+    if not variants and not args.ingest_only:
+        parser.error("--variants is required unless --ingest-only")
     records = {v: [] for v in variants}
     ingest_seconds = {}
     for conv in _convs(args.convs):
         store = store_dir("locomo", args.profile, f"conv{conv}{unit_suffix}")
         meta_path = store / "ingest_meta.json"
         if not meta_path.exists():
+            # A store without its meta is an interrupted ingest; start it over.
+            shutil.rmtree(store, ignore_errors=True)
             ingest_args = ["--max-sessions", str(args.max_sessions)] if args.max_sessions else []
             _worker(args.profile, store, {}, "ingest", "--conv", str(conv), *ingest_args)
         ingest_seconds[conv] = json.loads(meta_path.read_text())["ingest_seconds"]
+        if args.ingest_only:
+            continue
         for variant in variants:
             out = run_dir / variant / f"conv{conv}.jsonl"
             out.parent.mkdir(parents=True, exist_ok=True)
@@ -85,6 +93,10 @@ def main() -> None:
                 str(out),
             )
             records[variant].extend(json.loads(line) for line in out.read_text().splitlines())
+
+    if args.ingest_only:
+        print(f"stores ready: {ingest_seconds}")
+        return
 
     result = {
         "suite": "locomo-retrieval",
