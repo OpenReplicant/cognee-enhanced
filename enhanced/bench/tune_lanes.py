@@ -78,11 +78,19 @@ def fuse(candidates: list[dict], weights, depth: int = DEPTH) -> list[int]:
     return ranked
 
 
+def category_scores(rows: list[dict], weights, metric: str = "recall@5") -> dict[str, float]:
+    groups: dict[str, list[float]] = {}
+    for r in rows:
+        if not r["gold"]:
+            continue
+        value = question_metrics(r["gold"], fuse(r["candidates"], weights))[metric]
+        groups.setdefault("all", []).append(value)
+        groups.setdefault(r["category"], []).append(value)
+    return {k: sum(v) / len(v) for k, v in groups.items()}
+
+
 def score(rows: list[dict], weights, metric: str = "recall@5") -> float:
-    scored = [r for r in rows if r["gold"]]
-    return sum(
-        question_metrics(r["gold"], fuse(r["candidates"], weights))[metric] for r in scored
-    ) / len(scored)
+    return category_scores(rows, weights, metric)["all"]
 
 
 def validate(profile: str, convs: list[int], against: str) -> int:
@@ -101,19 +109,33 @@ def validate(profile: str, convs: list[int], against: str) -> int:
     return len(mismatched)
 
 
-def tune(profile: str, convs: list[int], metric: str) -> None:
+def tune(profile: str, convs: list[int], metric: str, max_category_drop: float | None) -> None:
+    """Grid search; with ``max_category_drop``, weights that lower any category's
+    dev score by more than that (vs equal weights) are not eligible."""
     rows = load(profile, convs)
+    equal_scores = category_scores(rows, (1.0, 1.0, 1.0), metric)
     results = []
     for dense, summary in itertools.product(GRID, GRID):
         weights = (dense, summary, 1.0)  # RRF order is scale-invariant: fix lexical at 1
-        results.append({"weights": weights, metric: round(score(rows, weights, metric), 4)})
-    results.sort(key=lambda r: -r[metric])
+        scores = category_scores(rows, weights, metric)
+        worst = min(scores[c] - equal_scores[c] for c in scores if c != "all")
+        results.append(
+            {
+                "weights": weights,
+                metric: round(scores["all"], 4),
+                "worst_category_delta": round(worst, 4),
+                "eligible": max_category_drop is None or worst >= -max_category_drop,
+            }
+        )
+    results.sort(key=lambda r: (not r["eligible"], -r[metric]))
     equal = next(r for r in results if r["weights"] == (1.0, 1.0, 1.0))
+    suffix = "" if max_category_drop is None else f"-maxdrop{max_category_drop:g}"
     out = {
         "suite": "locomo-lane-tuning",
         "profile": profile,
         "convs": convs,
         "metric": metric,
+        "max_category_drop": max_category_drop,
         "git": {"sha": _git("rev-parse", "HEAD")},
         "grid": list(GRID),
         "equal_weights": equal,
@@ -121,7 +143,7 @@ def tune(profile: str, convs: list[int], metric: str) -> None:
         "top10": results[:10],
         "all": results,
     }
-    path = RESULTS_DIR / "locomo" / f"H2-tune-{profile}.json"
+    path = RESULTS_DIR / "locomo" / f"H2-tune-{profile}{suffix}.json"
     path.write_text(json.dumps(out, indent=1))
     print(f"wrote {path.relative_to(REPO)}")
     print(f"  equal weights {equal}")
@@ -136,6 +158,12 @@ def main() -> None:
     parser.add_argument("--convs", default="0-4")
     parser.add_argument("--against", help="validate: RESULT.json:variant to reproduce")
     parser.add_argument("--metric", default="recall@5")
+    parser.add_argument(
+        "--max-category-drop",
+        type=float,
+        default=None,
+        help="tune: exclude weights that lower any category's dev score by more than this",
+    )
     args = parser.parse_args()
     convs = _convs(args.convs)
     if args.command == "dump":
@@ -145,7 +173,7 @@ def main() -> None:
         sys.exit(1 if validate(args.profile, convs, args.against) else 0)
     else:
         dump(args.profile, convs)
-        tune(args.profile, convs, args.metric)
+        tune(args.profile, convs, args.metric, args.max_category_drop)
 
 
 if __name__ == "__main__":

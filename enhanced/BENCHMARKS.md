@@ -158,3 +158,22 @@ Excluding session-header entities: 811 pairs, 146 confirmed, 240 entities
 (10.7%) with a duplicate. Blocking precision: containment 0.256, token
 Jaccard 0.232, embedding (same-type mutual nearest, cos ≥ 0.93) 0.462 on 39
 pairs.
+
+## 2026-10-20 · H2 rejected (haiku) · convs 5-9
+
+Dev tuning at `20a1f98f3` (`results/locomo/H2-tune-haiku.json`); test run at
+`ddbdd4797` (clean), file `results/locomo/H2-test-haiku.json`.
+
+| variant | R@5 | R@10 | MRR | R@1k tok | p95 |
+|---|---:|---:|---:|---:|---:|
+| hybrid_bm25 (H1) | 0.744 | 0.830 | 0.652 | 0.689 | 0.29 s |
+| hybrid_bm25_w_haiku (0, 0.25, 1) | 0.778 | 0.862 | 0.712 | 0.738 | 0.26 s |
+
+R@5 +0.034 [+0.016, +0.053], MRR +0.060 [+0.042, +0.078]. By category R@5:
+single_hop +0.057, adversarial +0.050, temporal +0.029 (n.s.), open_domain
++0.004 (n.s.), **multi_hop −0.044 [−0.086, −0.002]**.
+
+**Decision:** rejected under the no-significant-regression rule. The dev
+data showed the same multi_hop drop (−0.033), so the follow-up H2b constrains
+the tuning objective per category. That is a second, adaptive use of this
+test split.

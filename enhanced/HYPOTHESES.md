@@ -98,7 +98,7 @@ Gaps confirmed in the code (v1.6.5):
   lower on purpose because that was the conversation we looked at.)
 
 ### H2: Lane weights tuned per corpus beat equal-weight RRF
-- **Status:** registered
+- **Status:** rejected (haiku): overall gain met, but multi_hop regressed significantly. Follow-up H2b.
 - **Claim:** Weighted RRF (per-lane weight; the RRF k is already adaptive)
   tuned on dev conversations generalises to test conversations.
 - **Why:** The BEAM report found the best channel balance depends on the
@@ -130,6 +130,28 @@ Gaps confirmed in the code (v1.6.5):
   the lexical ranking, so a lexical weight > 1 is the obvious candidate.
   The embedder (bge-small) is weaker than upstream's default, which confounds
   this. Tuning needs haiku stores for convs 0-4.
+- **Result (haiku).** Dev tuning (`H2-tune-haiku.json`): equal 0.7715 → best
+  (dense 0, summary 0.25, lexical 1) 0.7948. Test split (`H2-test-haiku.json`,
+  n=982): R@5 0.744 → 0.778, **+3.4 pt [+1.6, +5.3]**; MRR +6.0 [+4.2,
+  +7.8]; single_hop +5.7, adversarial +5.0; but **multi_hop −4.35 pt [−8.6,
+  −0.2]**, a significant regression, so rejected under the acceptance
+  rule. The same drop was visible on dev (multi_hop −3.3) and the objective
+  ignored it: zeroing the dense-chunk lane removes the semantic signal
+  multi-hop questions need. (`hybrid_bm25` reproduced all 987 H1 rankings
+  in this run.)
+
+### H2b: Category-constrained lane weights
+- **Status:** registered
+- **Claim:** Weights chosen on dev to maximise recall@5 *subject to no
+  category losing more than 1 pt vs equal weights on dev* improve test
+  recall@5 over H1 without a significant regression in any category.
+- **Procedure:** `tune_lanes tune --max-category-drop 0.01` on dev convs 0-4
+  (haiku), then the best eligible weights through the real retriever on
+  convs 5-9 against `hybrid_bm25`.
+- **Prediction:** +1.5 pt recall@5 [CI above 0]; multi_hop within ±1.5 pt.
+- **Caveat:** this is the test split's second use for lane weights. H2's
+  test result motivated the constraint, which is adaptive reuse; the ledger
+  says so. A fresh check needs other data (LongMemEval / another profile).
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
 - **Status:** quality accepted (haiku, MiniLM); latency verdict pending an idle-machine measurement
