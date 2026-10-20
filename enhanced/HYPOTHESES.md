@@ -84,6 +84,9 @@ Gaps confirmed in the code (v1.6.5):
   answerer picks one. Recall at depth 20 rose and precision of the context
   fell. Hence the default stays off until a precision fix (H3 rerank, H4
   budget) is tested on answers. File: `results/locomo-qa/H1-qa-haiku.json`.
+- **Caveat (found later):** this QA ran on a non-deterministic hybrid
+  context (see H3, fixed in `5b9cd17c9`); a rerun of the same configs gave
+  hybrid 0.700 / hybrid_bm25 0.747. Treat both QA runs as noisy draws.
 
 ### H1b: Keyless retrieval should fuse BM25 with dense chunks
 - **Status:** registered
@@ -192,6 +195,14 @@ Gaps confirmed in the code (v1.6.5):
   the CPU. The registered latency check needs an idle machine; until then
   the change stays off. File: `results/locomo/H3-test-haiku.json`. bge
   untested on the test split.
+- **Answer accuracy (T1, 150 questions, `results/locomo-qa/H3-qa-haiku.json`):**
+  hybrid 0.700, hybrid_bm25 0.747, hybrid_bm25_rr_minilm 0.687. Rerank vs
+  H1 −6.0 pt [−12.0, 0.0] (6 wins / 15 losses); multi_hop 0.78 → 0.61.
+  **Inconclusive:** the same hybrid config scored 0.653 in the H1 QA run on
+  the same questions (48/150 identical answers, 31 verdict flips). The
+  cause was a non-deterministic hybrid context (entity-edge order and the
+  edges kept at the cut varied by process), fixed in `5b9cd17c9`. QA
+  comparisons are rerun on the fixed code with more questions.
 
 ### H4: Token-budgeted packing beats a fixed top-k
 - **Status:** proposed

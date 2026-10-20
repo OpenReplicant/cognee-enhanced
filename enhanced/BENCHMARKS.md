@@ -194,3 +194,31 @@ R@5 +0.005 [−0.007, +0.018]; multi_hop −0.038 [−0.072, −0.003].
 
 **Decision:** rejected. Lane-weight tuning is closed on this data. Equal
 weights stay.
+
+## 2026-10-20 · H3 answer accuracy (T1), inconclusive · plus a determinism bug
+
+Same 150 questions as the H1 QA run. Code at `b4eb3b024`. File:
+`results/locomo-qa/H3-qa-haiku.json`.
+
+| category | n | hybrid | hybrid_bm25 | hybrid_bm25_rr_minilm |
+|---|---:|---:|---:|---:|
+| adversarial | 29 | 0.310 | 0.414 | 0.345 |
+| multi_hop | 23 | 0.739 | 0.783 | 0.609 |
+| single_hop | 68 | 0.868 | 0.897 | 0.853 |
+| temporal | 30 | 0.667 | 0.700 | 0.700 |
+| **all** | 150 | **0.700** | **0.747** | **0.687** |
+
+Rerank vs H1: −0.060 [−0.120, 0.000], 6 wins / 15 losses.
+
+**Reproducibility check failed:** hybrid and hybrid_bm25 had already been
+answered in the H1 QA run. On rerun only 48/150 (hybrid) and 45/150
+(hybrid_bm25) answers were identical, and 31/29 verdicts flipped; accuracy
+moved 0.653 → 0.700 and 0.673 → 0.747 with no code change on their path.
+Cause: the hybrid context's entity-edge bullets came out in a
+process-dependent order, and sometimes a different set made the cut, so
+prompts differed and the proxy cache missed (704 of 900 calls). Fixed in
+`5b9cd17c9`; contexts are now byte-identical across processes.
+
+**Decision:** neither QA run supports a conclusion. Rerun on the fixed code
+with 60 questions per conversation, then repeat once to confirm it replays
+from cache.
