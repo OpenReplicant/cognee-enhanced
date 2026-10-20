@@ -132,7 +132,7 @@ Gaps confirmed in the code (v1.6.5):
   this. Tuning needs haiku stores for convs 0-4.
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
-- **Status:** registered
+- **Status:** quality accepted (haiku, MiniLM); latency verdict pending an idle-machine measurement
 - **Claim:** Fusing the chunk lane to a pool of 30, reranking that pool with a
   local cross-encoder, and cutting to 20 raises MRR and recall@5 over the same
   pipeline without the rerank.
@@ -152,6 +152,14 @@ Gaps confirmed in the code (v1.6.5):
   p95 latency ≤ +400 ms on 4 CPU cores. Above that budget the result is
   recorded and the change parked, even if quality improves. Test split,
   conversations 5-9, both profiles.
+- **Result (haiku, convs 5-9, n=982; MiniLM vs pool-30 control):** R@5
+  0.759 → 0.846, **+8.6 pt [+6.5, +10.8]**; MRR 0.655 → 0.768, **+11.3 pt
+  [+9.0, +13.5]**; every category improves (open_domain R@5 n.s., n=45).
+  Against upstream hybrid: +18.0 R@5, +19.1 MRR. Latency p50 3.1 s / p95
+  5.6 s vs 0.24 / 0.41 s, but measured while an ingest and a QA run shared
+  the CPU. The registered latency check needs an idle machine; until then
+  the change stays off. File: `results/locomo/H3-test-haiku.json`. bge
+  untested on the test split.
 
 ### H4: Token-budgeted packing beats a fixed top-k
 - **Status:** proposed

@@ -110,3 +110,30 @@ embeddings, 20-chunk context).
 single-hop losses keep the gold window at rank 1 but add same-person
 distractor windows, so the default stays off until a precision fix is tested
 on answers.
+
+## 2026-10-20 · H3 rerank, quality accepted (haiku) · convs 5-9
+
+Profile `haiku`, test split, 982 questions. Code at `6e164d0f0` (clean).
+File: `results/locomo/H3-test-haiku.json`. CPU shared with the haiku dev ingest
+and the entity dump, so latency is an upper bound.
+
+| variant | R@5 | R@10 | MRR | p50 / p95 |
+|---|---:|---:|---:|---:|
+| hybrid (upstream, from H1 file) | 0.666 | 0.761 | 0.577 | 0.22 / 0.32 s |
+| hybrid_bm25 (H1, from H1 file) | 0.744 | 0.830 | 0.652 | 0.25 / 0.35 s |
+| hybrid_bm25_pool30 (control) | 0.759 | 0.831 | 0.655 | 0.24 / 0.41 s |
+| **hybrid_bm25_rr_minilm** | **0.846** | **0.888** | **0.768** | 3.12 / 5.63 s |
+
+MiniLM vs control: R@5 +0.086 [+0.065, +0.108], MRR +0.113 [+0.090, +0.135];
+per category R@5: adversarial +0.103, temporal +0.097, single_hop +0.078,
+multi_hop +0.068, open_domain +0.104 (n.s.).
+
+```bash
+uv run python -m enhanced.bench.compare \
+  enhanced/results/locomo/H3-test-haiku.json:hybrid_bm25_pool30 \
+  enhanced/results/locomo/H3-test-haiku.json:hybrid_bm25_rr_minilm
+```
+
+**Decision:** quality criteria met by a wide margin. The latency criterion
+(≤ +400 ms p95, idle 4-core CPU) is not yet measured fairly, so the default
+stays off until it is; over budget there means park, as registered.
