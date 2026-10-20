@@ -62,20 +62,42 @@ Gaps confirmed in the code (v1.6.5):
 - **Metric:** LoCoMo recall@5 (primary), MRR, per category; p95 latency.
 - **Prediction:** +2 pt recall@5 overall; largest on single_hop; no category
   regresses significantly; p95 latency +≤50 ms.
-- **Change:** `hybrid_lexical_lane=True` kwarg on `HybridRetriever`, reusing
-  `BM25ChunksRetriever` scoring.
+- **Change:** `HybridRetriever(lexical_lane=True)`, reusing
+  `BM25ChunksRetriever` scoring (commit `b5f10041c`). Variant `hybrid_bm25`.
+- **Exploration (conv 0, keyless; not a decision):** hybrid 0.676 → hybrid_bm25
+  0.716 R@5 (+4.0 [−0.1, +8.3]); MRR +10.9 [+6.8, +15.0]. In the same run
+  hybrid scored *below* both of its inputs alone (dense chunks 0.745, BM25
+  0.776). See H2. File: `results/locomo/exploratory/H1-conv0.json`.
+- **Decision split:** conversation 0 has been seen, so the decision uses the
+  **test split, conversations 5-9**, with the prediction unchanged.
+
+### H1b: Keyless retrieval should fuse BM25 with dense chunks
+- **Status:** registered
+- **Claim:** For keyless installs (where `recall()` already falls back to
+  `CHUNKS`), dense-chunk + BM25 RRF beats dense chunks alone.
+- **Why:** The conv 0 exploration above. This needs no LLM, so it ships to
+  every no-key user.
+- **Metric:** recall@5 (primary), MRR; test split, conversations 5-9.
+  `hybrid_bm25_nosum` vs `chunks`.
+- **Prediction:** +3 pt recall@5, +5 pt MRR; no category regresses
+  significantly. (Conv 0 showed +6.1 R@5, +10.0 MRR; the prediction is set
+  lower on purpose because that was the conversation we looked at.)
 
 ### H2: Lane weights tuned per corpus beat equal-weight RRF
-- **Status:** proposed (run after H1)
+- **Status:** registered
 - **Claim:** Weighted RRF (per-lane weight; the RRF k is already adaptive)
   tuned on dev conversations generalises to test conversations.
 - **Why:** The BEAM report found the best channel balance depends on the
-  question mix. The keyless smoke run already ranks dense chunks alone above
-  hybrid on MRR, which hints that the summary lane can add noise when the
-  summaries are weak.
+  question mix. On conv 0 (keyless), removing the dense summary lane raised
+  hybrid from 0.676 to 0.745 R@5, the same as dense chunks alone, and dense +
+  BM25 without summaries reached 0.806 R@5 / 0.714 MRR, the best of every
+  variant tried. Keyless summaries are assembled from GLiNER extractions, so
+  this may not hold for LLM-written summaries. That is the open question.
 - **Metric:** recall@5 on test split (conversations 5-9).
-- **Prediction:** +1 pt over H1's equal weights; the summary-lane weight
-  falls below 1 under the keyless profile.
+- **Prediction (keyless):** summary-lane weight tuned on convs 0-4 ends below
+  0.5, and `hybrid_bm25_nosum` beats `hybrid` by ≥5 pt R@5 on 5-9.
+  **Prediction (llm, T1):** the tuned summary weight stays ≥0.5. If it does,
+  lane weights must be profile-specific, not a single new default.
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
 - **Status:** proposed

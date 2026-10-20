@@ -28,6 +28,29 @@ VARIANTS = {
         },
         "env": {},
     },
+    # Ablation: hybrid without the dense summary lane.
+    "hybrid_nosum": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": DEPTH,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "text_summaries_top_k": 0,
+        },
+        "env": {},
+    },
+    # Ablation: H1 without the dense summary lane (dense chunk + BM25 only).
+    "hybrid_bm25_nosum": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": DEPTH,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "text_summaries_top_k": 0,
+            "lexical_lane": True,
+        },
+        "env": {},
+    },
     # Single dense lane over chunks.
     "chunks": {
         "retriever": "cognee.modules.retrieval.chunks_retriever:ChunksRetriever",
