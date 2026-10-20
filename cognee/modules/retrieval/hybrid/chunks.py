@@ -54,6 +54,7 @@ async def retrieve_hybrid_chunks(
     personal_influence: float = 0.0,
     collections: tuple[str, ...] = chunk_collections(include_dlt_rows=False),
     lexical_lane: bool = False,
+    lane_weights: tuple[float, float, float] | None = None,
 ) -> dict[str, Any]:
     candidate_limit = chunk_candidate_limit(chunks_top_k)
     summary_limit = summary_candidate_limit(chunks_top_k, text_summaries_top_k)
@@ -107,6 +108,7 @@ async def retrieve_hybrid_chunks(
         current_truth_epoch=current_truth_epoch,
         personal_weights=personal_weights,
         personal_influence=personal_influence,
+        lane_weights=lane_weights,
     )
     if summary_limit > 0:
         await load_summary_text_for_ranked_pairs(

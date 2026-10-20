@@ -13,9 +13,16 @@ def rank_chunk_summary_pairs(
     current_truth_epoch: int | None = None,
     personal_weights: dict | None = None,
     personal_influence: float = 0.0,
+    lane_weights: tuple[float, float, float] | None = None,
 ) -> list[dict]:
+    """Rank chunk-lane pairs by reciprocal-rank fusion of their lane ranks.
+
+    ``lane_weights`` scales each lane's RRF term as (dense chunk, dense
+    summary, lexical); None weighs all three 1.0 (enhanced/HYPOTHESES.md H2).
+    """
     if limit <= 0:
         return []
+    weights = lane_weights or (1.0, 1.0, 1.0)
 
     rrf_k = _rrf_k(limit)
     ranked = []
@@ -25,11 +32,12 @@ def rank_chunk_summary_pairs(
             continue
 
         lane_ranks = (pair["vector_rank"], pair["summary_rank"], pair.get("lexical_rank"))
-        ranks = [rank for rank in lane_ranks if rank is not None]
+        weighted = [(weight, rank) for weight, rank in zip(weights, lane_ranks) if rank is not None]
+        ranks = [rank for _, rank in weighted]
         if not ranks:
             continue
 
-        rrf_score = sum(1.0 / (rrf_k + rank + 1) for rank in ranks)
+        rrf_score = sum(weight / (rrf_k + rank + 1) for weight, rank in weighted)
         final_score = rrf_score
         if use_importance_weight:
             final_score *= _importance_factor(chunk)

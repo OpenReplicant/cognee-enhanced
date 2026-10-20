@@ -176,3 +176,32 @@ def test_graph_key_follows_the_graph_context_config(monkeypatch):
     monkeypatch.setattr(graph_config, "get_graph_context_config", lambda: {"path": "/b"})
 
     assert hybrid_chunks._graph_key() != first
+
+
+def test_lane_weights_scale_each_lanes_rrf_term():
+    pairs = chunk_summary_pairs([_chunk("a"), _chunk("b")], [])
+    add_lexical_ranks(pairs, [({"id": "b"}, 5.0)])
+
+    lexical_off = rank_chunk_summary_pairs(
+        pairs, limit=2, use_importance_weight=False, lane_weights=(1.0, 1.0, 0.0)
+    )
+    lexical_heavy = rank_chunk_summary_pairs(
+        pairs, limit=2, use_importance_weight=False, lane_weights=(1.0, 1.0, 3.0)
+    )
+
+    # a: dense rank 0. b: dense rank 1 plus lexical rank 0, so b leads unless
+    # the lexical term is weighted out.
+    assert [pair["chunk_id"] for pair in lexical_off] == ["a", "b"]
+    assert [pair["chunk_id"] for pair in lexical_heavy] == ["b", "a"]
+
+
+def test_unit_lane_weights_match_the_default():
+    pairs = chunk_summary_pairs([_chunk("a"), _chunk("b"), _chunk("c")], [])
+    add_lexical_ranks(pairs, [({"id": "c"}, 2.0), ({"id": "a"}, 1.0)])
+
+    default = rank_chunk_summary_pairs(pairs, limit=3, use_importance_weight=False)
+    unit = rank_chunk_summary_pairs(
+        pairs, limit=3, use_importance_weight=False, lane_weights=(1.0, 1.0, 1.0)
+    )
+
+    assert [p["chunk_id"] for p in default] == [p["chunk_id"] for p in unit]
