@@ -39,7 +39,9 @@ def _worker(profile: str, store: Path, extra_env: dict, *args) -> None:
 
 
 def _git(*args) -> str:
-    return subprocess.run(["git", *args], cwd=REPO, capture_output=True, text=True).stdout.strip()
+    return subprocess.run(
+        ["git", *args], cwd=REPO, capture_output=True, text=True, check=False
+    ).stdout.strip()
 
 
 def main() -> None:

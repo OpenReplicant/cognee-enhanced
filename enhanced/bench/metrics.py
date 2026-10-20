@@ -56,7 +56,10 @@ def paired_bootstrap(a: list[float], b: list[float], iterations: int = 10000, se
     means = sorted(sum(diffs[rng.randrange(n)] for _ in range(n)) / n for _ in range(iterations))
     return {
         "delta": round(sum(diffs) / n, 4),
-        "ci95": [round(means[int(0.025 * iterations)], 4), round(means[int(0.975 * iterations)], 4)],
+        "ci95": [
+            round(means[int(0.025 * iterations)], 4),
+            round(means[int(0.975 * iterations)], 4),
+        ],
         "n": n,
         "wins": sum(d > 0 for d in diffs),
         "losses": sum(d < 0 for d in diffs),

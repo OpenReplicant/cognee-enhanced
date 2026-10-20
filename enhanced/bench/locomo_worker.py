@@ -27,7 +27,6 @@ from cognee.eval_framework.locomo.preprocess import (
     build_conversation_windows,
     conversation_overview_text,
 )
-
 from enhanced.bench.profiles import CACHE_DIR
 from enhanced.bench.variants import VARIANTS
 

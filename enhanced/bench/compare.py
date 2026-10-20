@@ -16,7 +16,8 @@ from enhanced.bench.metrics import paired_bootstrap, scored
 
 def _load(spec: str) -> dict:
     path, _, variant = spec.rpartition(":")
-    data = json.load(open(path))
+    with open(path) as handle:
+        data = json.load(handle)
     rows = scored(data["variants"][variant]["questions"])
     return {r["qid"]: r for r in rows}
 
