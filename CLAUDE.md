@@ -1,5 +1,10 @@
 # CLAUDE.md
 
+> **cognee-enhanced fork:** fork-specific work follows `enhanced/README.md`.
+> Register a hypothesis in `enhanced/HYPOTHESES.md` before implementing it, keep
+> upstream behaviour as the default behind a switch, and commit benchmark
+> results (`enhanced/results/`, `enhanced/BENCHMARKS.md`) with every enhancement.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
