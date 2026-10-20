@@ -87,6 +87,7 @@ class HybridRetriever(BaseRetriever):
         facts_top_k: int | None = 5,
         include_external_metadata: bool = False,
         external_metadata_keys: list[str] | None = None,
+        lexical_lane: bool = False,
     ):
         self.chunks_top_k = chunks_top_k if chunks_top_k is not None else 5
         self.entities_top_k = entities_top_k if entities_top_k is not None else 5
@@ -110,6 +111,9 @@ class HybridRetriever(BaseRetriever):
         # prompt stay exactly as before.
         self.include_external_metadata = include_external_metadata
         self.external_metadata_keys = list(external_metadata_keys or [])
+        # Opt-in: BM25 rank as a third input to the chunk lane's RRF, beside the
+        # dense chunk and summary ranks (enhanced/HYPOTHESES.md H1).
+        self.lexical_lane = lexical_lane
 
     def _use_session_cache(self) -> bool:
         user = session_user.get()
@@ -187,6 +191,7 @@ class HybridRetriever(BaseRetriever):
                 personal_weights=personal_weights,
                 personal_influence=get_base_config().personalization_influence,
                 collections=chunk_collections(include_dlt),
+                lexical_lane=self.lexical_lane,
             ),
             self._retrieve_entities_and_facts(query, query_vector, include_dlt),
         )

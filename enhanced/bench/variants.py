@@ -17,6 +17,17 @@ VARIANTS = {
         "kwargs": {"chunks_top_k": DEPTH, "entities_top_k": 20, "facts_top_k": 20},
         "env": {},
     },
+    # H1: hybrid + BM25 rank as a third chunk-lane RRF input.
+    "hybrid_bm25": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": DEPTH,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "lexical_lane": True,
+        },
+        "env": {},
+    },
     # Single dense lane over chunks.
     "chunks": {
         "retriever": "cognee.modules.retrieval.chunks_retriever:ChunksRetriever",

@@ -7,6 +7,7 @@ from cognee.infrastructure.databases.vector.exceptions import CollectionNotFound
 from cognee.modules.chunking.models.DltRow import DltRow
 from cognee.modules.chunking.models.DocumentChunk import DocumentChunk
 from cognee.modules.retrieval.hybrid.pairs import (
+    add_lexical_ranks,
     attach_source_chunks,
     chunk_summary_pairs,
     source_chunk_ids_to_load,
@@ -48,10 +49,12 @@ async def retrieve_hybrid_chunks(
     personal_weights: dict | None = None,
     personal_influence: float = 0.0,
     collections: tuple[str, ...] = chunk_collections(include_dlt_rows=False),
+    lexical_lane: bool = False,
 ) -> dict[str, Any]:
     candidate_limit = chunk_candidate_limit(chunks_top_k)
     summary_limit = summary_candidate_limit(chunks_top_k, text_summaries_top_k)
-    vector_chunks, summary_hits = await asyncio.gather(
+    lexical_limit = candidate_limit if lexical_lane else 0
+    vector_chunks, summary_hits, lexical_hits = await asyncio.gather(
         search_collections(
             vector_engine,
             collections,
@@ -70,6 +73,7 @@ async def retrieve_hybrid_chunks(
             node_name_filter_operator,
             query_vector=query_vector,
         ),
+        search_lexical(query, lexical_limit),
     )
 
     pairs = chunk_summary_pairs(
@@ -78,6 +82,7 @@ async def retrieve_hybrid_chunks(
         node_name,
         node_name_filter_operator,
     )
+    add_lexical_ranks(pairs, lexical_hits, node_name, node_name_filter_operator)
     missing_source_chunk_ids = source_chunk_ids_to_load(pairs)
     if missing_source_chunk_ids:
         source_chunks = await load_source_chunks_for_summaries(
@@ -111,6 +116,23 @@ async def retrieve_hybrid_chunks(
         "chunks": [pair["chunk"] for pair in ranked_pairs if pair["chunk"] is not None],
         "chunk_summaries": summary_text_by_chunk_id(ranked_pairs),
     }
+
+
+async def search_lexical(query: str, limit: int) -> list[tuple[dict, float]]:
+    """BM25 over every DocumentChunk, as ``(payload, score)`` pairs; empty when off.
+
+    A lexical failure (no chunks yet, graph unreadable) leaves the dense lanes
+    to answer alone rather than failing the search.
+    """
+    if limit <= 0:
+        return []
+    from cognee.modules.retrieval.bm25_retriever import BM25ChunksRetriever
+
+    try:
+        return await BM25ChunksRetriever(top_k=limit, with_scores=True).get_retrieved_objects(query)
+    except Exception:
+        logger.warning("Hybrid lexical lane failed; continuing without it", exc_info=True)
+        return []
 
 
 def chunk_candidate_limit(chunks_top_k: int) -> int:

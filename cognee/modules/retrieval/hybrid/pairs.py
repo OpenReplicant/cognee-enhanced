@@ -55,11 +55,43 @@ def chunk_summary_pairs(
     return pairs
 
 
+def add_lexical_ranks(
+    pairs: list[dict],
+    lexical_hits: list[tuple[dict, float]],
+    node_name: list[str] | None = None,
+    node_name_filter_operator: str = "OR",
+) -> None:
+    """Record each chunk's rank in the lexical (BM25) lane on its pair.
+
+    Hits scoring 0 share no query term with the chunk and get no rank. A chunk
+    only the lexical lane found gets a pair without a chunk object, loaded
+    from the vector store with the summary-only ones (``source_chunk_ids_to_load``).
+    """
+    rank = 0
+    for hit_payload, score in lexical_hits or []:
+        if not score or score <= 0:
+            continue
+        if not payload_matches_node_filter(hit_payload, node_name, node_name_filter_operator):
+            continue
+        chunk_id = display_value(hit_payload.get("id"))
+        if not chunk_id:
+            continue
+        pair = _find_chunk_summary_pair(pairs, chunk_id, None)
+        if pair is None:
+            pair = _new_chunk_summary_pair(chunk_id=chunk_id)
+            pairs.append(pair)
+        if pair["lexical_rank"] is None:
+            pair["lexical_rank"] = rank
+        rank += 1
+
+
 def source_chunk_ids_to_load(pairs: list[dict]) -> list[str]:
     return [
         pair["chunk_id"]
         for pair in pairs
-        if pair["summary_rank"] is not None and pair["chunk"] is None and pair["chunk_id"]
+        if (pair["summary_rank"] is not None or pair["lexical_rank"] is not None)
+        and pair["chunk"] is None
+        and pair["chunk_id"]
     ]
 
 
@@ -117,4 +149,5 @@ def _new_chunk_summary_pair(
         "chunk": None,
         "vector_rank": None,
         "summary_rank": None,
+        "lexical_rank": None,
     }

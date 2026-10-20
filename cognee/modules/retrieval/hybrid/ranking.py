@@ -24,7 +24,8 @@ def rank_chunk_summary_pairs(
         if chunk is None:
             continue
 
-        ranks = [rank for rank in (pair["vector_rank"], pair["summary_rank"]) if rank is not None]
+        lane_ranks = (pair["vector_rank"], pair["summary_rank"], pair.get("lexical_rank"))
+        ranks = [rank for rank in lane_ranks if rank is not None]
         if not ranks:
             continue
 
