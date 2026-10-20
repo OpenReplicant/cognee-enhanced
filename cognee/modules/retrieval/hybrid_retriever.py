@@ -34,6 +34,7 @@ from cognee.modules.retrieval.hybrid.facts import (
 )
 from cognee.modules.retrieval.hybrid.merge import merge_hybrid_results
 from cognee.modules.retrieval.hybrid.references import cite_hybrid_completions
+from cognee.modules.retrieval.hybrid.rerank import rerank_chunks
 from cognee.modules.retrieval.hybrid.truth import build_truth_context
 from cognee.modules.retrieval.utils.completion import (
     SessionPrompt,
@@ -88,6 +89,8 @@ class HybridRetriever(BaseRetriever):
         include_external_metadata: bool = False,
         external_metadata_keys: list[str] | None = None,
         lexical_lane: bool = False,
+        rerank_top_n: int | None = None,
+        rerank_model: str | None = None,
     ):
         self.chunks_top_k = chunks_top_k if chunks_top_k is not None else 5
         self.entities_top_k = entities_top_k if entities_top_k is not None else 5
@@ -114,6 +117,11 @@ class HybridRetriever(BaseRetriever):
         # Opt-in: BM25 rank as a third input to the chunk lane's RRF, beside the
         # dense chunk and summary ranks (enhanced/HYPOTHESES.md H1).
         self.lexical_lane = lexical_lane
+        # Opt-in: fuse the chunk lane to a pool of rerank_top_n, reorder it with
+        # a local cross-encoder (when rerank_model is set), then cut to
+        # chunks_top_k as usual (enhanced/HYPOTHESES.md H3).
+        self.rerank_top_n = rerank_top_n
+        self.rerank_model = rerank_model
 
     def _use_session_cache(self) -> bool:
         user = session_user.get()
@@ -178,7 +186,7 @@ class HybridRetriever(BaseRetriever):
             retrieve_hybrid_chunks(
                 vector_engine=self._unified_engine.vector,
                 query=query,
-                chunks_top_k=self.chunks_top_k,
+                chunks_top_k=max(self.chunks_top_k, self.rerank_top_n or 0),
                 text_summaries_top_k=self.text_summaries_top_k,
                 node_name=self.node_name,
                 node_name_filter_operator=self.node_name_filter_operator,
@@ -195,6 +203,10 @@ class HybridRetriever(BaseRetriever):
             ),
             self._retrieve_entities_and_facts(query, query_vector, include_dlt),
         )
+        if self.rerank_model:
+            chunk_objects["chunks"] = await rerank_chunks(
+                self.rerank_model, query, chunk_objects.get("chunks", [])
+            )
         project_external_metadata(
             chunk_objects.get("chunks", []),
             self.include_external_metadata,

@@ -100,16 +100,26 @@ Gaps confirmed in the code (v1.6.5):
   lane weights must be profile-specific, not a single new default.
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
-- **Status:** proposed
-- **Claim:** Reranking the top 30 fused chunks with a small cross-encoder
-  (fastembed `TextCrossEncoder`, e.g. `BAAI/bge-reranker-base`) raises MRR and
-  recall@5.
+- **Status:** registered
+- **Claim:** Fusing the chunk lane to a pool of 30, reranking that pool with a
+  local cross-encoder, and cutting to 20 raises MRR and recall@5 over the same
+  pipeline without the rerank.
 - **Why:** Retrieve-then-rerank is the standard gain on MS MARCO and BEIR.
   Cognee has no reranker at all.
-- **Metric:** MRR (primary), recall@5; p95 latency per query on CPU.
-- **Prediction:** MRR +5 pt; recall@5 +3 pt; p95 latency ≤ +400 ms on 4 CPU
-  cores. Rejected if latency exceeds that budget even when quality improves
-  (record the result and park).
+- **Change:** `HybridRetriever(rerank_top_n=30, rerank_model=...)` with
+  fastembed `TextCrossEncoder` (`cognee/modules/retrieval/hybrid/rerank.py`);
+  a model failure keeps the fused order.
+- **Variants:** base `hybrid_bm25` (H1). Control `hybrid_bm25_pool30` (pool
+  of 30, no rerank), which separates the larger pool's effect from the
+  reranker's. Treatments `hybrid_bm25_rr_minilm` (ms-marco-MiniLM-L-6, 80 MB)
+  and `hybrid_bm25_rr_bge` (bge-reranker-base, 1 GB). The decision compares
+  each treatment against the **control**.
+- **Metric:** MRR (primary), recall@5; p95 retrieval latency, measured on
+  an idle machine for the decision run.
+- **Prediction:** MRR +5 pt and recall@5 +3 pt for at least one model;
+  p95 latency ≤ +400 ms on 4 CPU cores. Above that budget the result is
+  recorded and the change parked, even if quality improves. Test split,
+  conversations 5-9, both profiles.
 
 ### H4: Token-budgeted packing beats a fixed top-k
 - **Status:** proposed
