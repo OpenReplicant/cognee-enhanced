@@ -51,7 +51,7 @@ Gaps confirmed in the code (v1.6.5):
 ## Tier T0: retrieval, LLM-free (start here)
 
 ### H1: A lexical lane in hybrid RRF raises chunk recall
-- **Status:** registered
+- **Status:** accepted (haiku profile, retrieval). Default flip waits on a cached BM25 index (the lane rescans all chunks per query) and the keyless test split.
 - **Claim:** Adding the BM25 rank as a third input to the hybrid chunk lane's
   RRF (beside the dense-chunk and dense-summary ranks) raises recall@5.
 - **Why:** Conversational memory questions name people, objects and places
@@ -70,6 +70,11 @@ Gaps confirmed in the code (v1.6.5):
   0.776). See H2. File: `results/locomo/exploratory/H1-conv0.json`.
 - **Decision split:** conversation 0 has been seen, so the decision uses the
   **test split, conversations 5-9**, with the prediction unchanged.
+- **Result (haiku, convs 5-9, n=982):** R@5 0.666 → 0.744, **+7.8 pt
+  [+5.8, +9.9]**; MRR +7.5 [+5.9, +9.2]; largest on adversarial (+11.0) and
+  single_hop (+9.6); no category regresses (multi_hop MRR −0.1 [−5.7, +5.4]);
+  p95 latency 0.317 → 0.351 s (+34 ms). Every criterion met. File:
+  `results/locomo/H1-test-haiku.json`.
 
 ### H1b: Keyless retrieval should fuse BM25 with dense chunks
 - **Status:** registered
@@ -98,6 +103,13 @@ Gaps confirmed in the code (v1.6.5):
   0.5, and `hybrid_bm25_nosum` beats `hybrid` by ≥5 pt R@5 on 5-9.
   **Prediction (llm, T1):** the tuned summary weight stays ≥0.5. If it does,
   lane weights must be profile-specific, not a single new default.
+- **Evidence so far (haiku, convs 5-9; ablations, not the tuned test):**
+  removing the summary lane costs −4.6 pt R@5 [−6.3, −3.0], so LLM summaries
+  help, as predicted. BM25 *alone* (R@5 0.783, MRR 0.717) beats every
+  equal-weight fusion, including H1 (0.744 / 0.652): the dense lanes dilute
+  the lexical ranking, so a lexical weight > 1 is the obvious candidate.
+  The embedder (bge-small) is weaker than upstream's default, which confounds
+  this. Tuning needs haiku stores for convs 0-4.
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
 - **Status:** registered
