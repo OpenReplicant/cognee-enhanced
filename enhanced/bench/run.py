@@ -53,6 +53,9 @@ def main() -> None:
     parser.add_argument("--profile", default="keyless")
     parser.add_argument("--max-sessions", type=int, default=None)
     parser.add_argument("--ingest-only", action="store_true", help="build missing stores only")
+    parser.add_argument(
+        "--resume", action="store_true", help="reuse conversation x variant runs already finished"
+    )
     args = parser.parse_args()
 
     variants = args.variants.split(",") if args.variants else []
@@ -80,6 +83,10 @@ def main() -> None:
         for variant in variants:
             out = run_dir / variant / f"conv{conv}.jsonl"
             out.parent.mkdir(parents=True, exist_ok=True)
+            done = run_dir / variant / f"conv{conv}.done"
+            if args.resume and done.exists():
+                records[variant].extend(json.loads(line) for line in out.read_text().splitlines())
+                continue
             _worker(
                 args.profile,
                 store,
@@ -92,6 +99,7 @@ def main() -> None:
                 "--out",
                 str(out),
             )
+            done.touch()
             records[variant].extend(json.loads(line) for line in out.read_text().splitlines())
 
     if args.ingest_only:
