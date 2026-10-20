@@ -255,7 +255,24 @@ Gaps confirmed in the code (v1.6.5):
 - **Metric:** leakage rate on a seeded-injection corpus; LoCoMo recall@5
   guard.
 
-## Tier T1/T2: need an LLM (blocked until the key has budget)
+### H15: Keep synthetic chunk headers out of entity extraction
+- **Status:** proposed
+- **Observation:** in the haiku stores, about 20% of Entity nodes (83-100 of
+  420-527 per conversation) are session-header artefacts ("session 6
+  conversation between audrey and andrew", "conversation session 25"),
+  extracted from the dated header upstream's LoCoMo preprocessing puts on
+  every window. They crowd the entity lane and are the bulk of the alias
+  candidates in H9's data.
+- **Claim:** passing the header to extraction as context ("this passage is
+  from session 6, dated ...") rather than as extractable text removes those
+  nodes, raises entity-lane precision, and leaves temporal recall unchanged
+  (the date stays in the chunk text that is embedded and shown).
+- **Metric:** session-like entity count; hybrid recall@5 on temporal
+  (guard) and overall; entity-lane hit rate. Needs re-ingestion (new store).
+
+## Tier T1/T2: need an LLM
+
+These run through the Claude Code proxy (`enhanced/llm_proxy.py`).
 
 ### H11: Write-time reconciliation beats post-hoc conflict review
 - **Status:** proposed
