@@ -250,6 +250,21 @@ Gaps confirmed in the code (v1.6.5):
   hybrid entity-lane recall (T0) and H6 multi-hop.
 - **Prediction:** precision ≥0.95 at recall ≥0.6 with no LLM in the merge
   decision; an LLM adjudicator for the uncertain band lifts recall further.
+- **Baseline (haiku stores, convs 5-9; `results/entity-resolution/`):**
+  2,242 entities. 525 (23.4%) have a Haiku-confirmed duplicate, but session-
+  header artefacts (H15) account for most of them; excluding those, 240
+  entities (10.7%) have one ("low-impact exercises" / "low-impact
+  exercise", "animal shelter" / "shelter"). Blocking precision against the
+  labels: containment 0.26, token Jaccard 0.23, same-type mutual-nearest
+  embedding 0.46 (39 flagged). Rules alone won't reach the predicted 0.95,
+  so the adjudicator is required. Labels are Haiku on names + descriptions
+  (some debatable, e.g. "photo of dogs" / "dogs running photo"), and recall
+  is bounded by the blocking. `pairs-haiku.jsonl` (1,514 pairs) is the H9
+  evaluation set.
+- **Side finding (relation names):** the same relation under several names,
+  e.g. `is_part_of` 565 / `part_of` 129, `participated_in` /
+  `participates_in`, `conversed_at` / `conversation_at` / `talked_in`.
+  Normalising relation names is a cheap separate step worth testing with H9.
 
 ### H10: Quarantining instruction-like captures cuts injection leakage
 - **Status:** proposed

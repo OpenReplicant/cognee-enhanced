@@ -137,3 +137,24 @@ uv run python -m enhanced.bench.compare \
 **Decision:** quality criteria met by a wide margin. The latency criterion
 (≤ +400 ms p95, idle 4-core CPU) is not yet measured fairly, so the default
 stays off until it is; over budget there means park, as registered.
+
+## 2026-10-20 · H9 baseline: entity duplication in haiku stores · convs 5-9
+
+Measurement, not a decision. Code at `57bfc4ed9` (`bench/entity_dups.py`).
+Files: `results/entity-resolution/baseline-haiku.json`,
+`results/entity-resolution/pairs-haiku.jsonl` (1,514 labelled candidate pairs).
+Labels are Claude Haiku judging names + descriptions in batches of 25.
+
+| conv | entities | candidate pairs | confirmed | entities with a duplicate |
+|---|---:|---:|---:|---:|
+| 5 | 420 | 372 | 82 | 132 |
+| 6 | 527 | 268 | 66 | 100 |
+| 7 | 485 | 324 | 88 | 114 |
+| 8 | 417 | 260 | 31 | 56 |
+| 9 | 393 | 290 | 86 | 123 |
+| **all** | **2,242** | **1,514** | **353** | **525 (23.4%)** |
+
+Excluding session-header entities: 811 pairs, 146 confirmed, 240 entities
+(10.7%) with a duplicate. Blocking precision: containment 0.256, token
+Jaccard 0.232, embedding (same-type mutual nearest, cos ≥ 0.93) 0.462 on 39
+pairs.
