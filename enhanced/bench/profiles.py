@@ -41,6 +41,21 @@ PROFILES = {
         "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
         "EMBEDDING_DIMENSIONS": "384",
     },
+    # LLM-built graph and summaries from Claude Haiku through the local
+    # Claude Code proxy (`python -m enhanced.llm_proxy --model haiku`, port
+    # 8765); same local embeddings as keyless, so the two profiles differ
+    # only in who extracts the graph and writes the summaries.
+    "haiku": {
+        "GRAPH_EXTRACTOR": "llm",
+        "LLM_PROVIDER": "custom",
+        "LLM_MODEL": "openai/haiku",
+        "LLM_ENDPOINT": "http://127.0.0.1:8765/v1",
+        "LLM_API_KEY": "local-proxy",
+        "LLM_INSTRUCTOR_MODE": "json_mode",
+        "EMBEDDING_PROVIDER": "fastembed",
+        "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+        "EMBEDDING_DIMENSIONS": "384",
+    },
 }
 
 

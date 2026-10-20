@@ -55,13 +55,35 @@ that defaults to upstream behaviour until the hypothesis is accepted.
 | **T0** | LoCoMo retrieval: evidence recall@k / all@k / MRR per question category, keyless profile (GLiNER graph + `bge-small` embeddings) | no | ready |
 | T0b | LongMemEval-S session recall; MuSiQue / 2Wiki supporting-paragraph recall (multi-hop) | no | planned |
 | M | Micro-benchmarks for one component (entity-resolution P/R, injection leakage, token cost) | varies | per hypothesis |
-| T1 | QA accuracy (answer + LLM judge) on a fixed subset, LLM-built graph, cached responses | yes | **blocked: OpenRouter key has a $0 limit; only `:free` models answer** |
+| T1r | T0's retrieval metrics on an **LLM-built** store (`haiku` profile) | ingest only | ready |
+| T1 | QA accuracy (answer + LLM judge) on a fixed subset, cached responses | yes | planned (Haiku via the proxy) |
 | T2 | Upstream full LoCoMo / BEAM evals (`cognee/eval_framework/`) | yes, paid | out of budget |
 
 T0 is cheap, deterministic, and measures what most retrieval hypotheses change.
 Its known blind spot: the keyless graph comes from the GLiNER demo extractor,
 which is much weaker than an LLM-built graph. Graph-side hypotheses (H6, H7)
 that pass T0 still need a T1 check before their default flips.
+
+### LLM access: the Claude Code proxy
+
+The OpenRouter key has a $0 limit, so LLM work goes through
+`enhanced/llm_proxy.py`. It is an OpenAI-compatible endpoint that runs each
+request as a headless `claude -p --model haiku` call (no tools, settings, MCP
+or session persistence) and caches every response on disk by request hash:
+
+```bash
+uv run python -m enhanced.llm_proxy --port 8765 --model haiku &   # keep running
+uv run python -m enhanced.bench.run --name ... --profile haiku --variants ...
+```
+
+The `haiku` profile points cognee's `custom` provider at the proxy
+(`json_mode` instructor output) and keeps the keyless profile's local
+embeddings, so the two profiles differ only in who builds the graph and
+summaries. Pilot (10 windows): about 2 calls per document, about 9k
+tokens per window, so a full LoCoMo store is about 10M tokens (about $2.60 at
+Haiku list price) and about 2 hours at concurrency 4. Usage is logged to
+`.cache/llm_proxy/haiku/usage.jsonl`. These calls count against the Claude
+plan the session runs under.
 
 ### How T0 works
 
