@@ -249,3 +249,10 @@ accuracy hardly responds to ranking (+18 pt recall@5 here moves answers by
 +2 pt n.s.). The evidence is almost always in the 20 and the reader finds it.
 Next: QA at a small context (`chunks_top_k=5`), where ranking should
 matter. That is also the first H4 test.
+
+**Reproducibility check (repeat at `681d06481`, clean):**
+`results/locomo-qa/QA-det-haiku-repeat.json` replayed every answer and
+verdict: 900/900 answers, context sizes and verdicts identical across the
+three variants, including the lexical lane after the graph-cache refactor.
+T1 results on the fixed code reproduce exactly, so the `dirty` flag on the
+first run is resolved.
