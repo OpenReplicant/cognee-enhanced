@@ -305,13 +305,33 @@ def _edge_bullets_from_connections(
     if max_edges <= 0:
         return []
 
-    ranked = _deduplicated_bullets(connections)
+    # Canonical order first: the neighbourhood query returns edges in an order
+    # that differs between processes, and both the dedupe (first text wins) and
+    # the stable rank sort below inherit it. Without this the same query over the
+    # same graph can show different edges at the max_edges cut.
+    ranked = _deduplicated_bullets(sorted(connections or [], key=_connection_order_key))
     ranked.sort(key=lambda ranked_edge: _edge_sort_key(ranked_edge.bullet, edge_ranks))
     selected = ranked[:max_edges]
     # Inside the window a superseded fact sinks below the ones that still hold.
     # The sort is stable, so everything else keeps the rank order above.
     selected.sort(key=lambda ranked_edge: ranked_edge.superseded)
     return [ranked_edge.bullet for ranked_edge in selected]
+
+
+def _connection_order_key(connection: Any) -> tuple[str, ...]:
+    """A total order over connections that depends only on their content."""
+    unpacked = _unpack_connection(connection)
+    if unpacked is None:
+        return ("~",)
+    source, edge, target = unpacked
+    properties = edge.get("properties") if isinstance(edge.get("properties"), dict) else {}
+    return (
+        display_value(source.get("id")) or "",
+        display_value(edge.get("relationship_name")) or "",
+        display_value(target.get("id")) or "",
+        display_value(edge.get("edge_text")) or display_value(properties.get("edge_text")) or "",
+        display_value(properties.get("edge_object_id")) or "",
+    )
 
 
 def _deduplicated_bullets(connections: Any) -> list["_RankedEdge"]:
