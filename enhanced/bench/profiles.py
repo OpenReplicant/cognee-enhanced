@@ -4,6 +4,8 @@ A profile is applied before cognee is imported (cognee caches its config at
 import), so every ingest and retrieval run happens in its own subprocess.
 """
 
+import contextlib
+import fcntl
 import os
 from pathlib import Path
 
@@ -85,3 +87,21 @@ def profile_env(profile: str, store_dir: Path) -> dict:
 def store_dir(benchmark: str, profile: str, unit: str) -> Path:
     """Where the ingested store for one benchmark unit (e.g. a conversation) lives."""
     return CACHE_DIR / "stores" / benchmark / profile / unit
+
+
+@contextlib.contextmanager
+def store_lock(store: Path):
+    """Hold an exclusive lock on ``store`` while a subprocess uses it.
+
+    The embedded graph database takes an exclusive file lock, so two benchmark
+    jobs opening the same store at once crash one of them. Every harness
+    entry point that launches a store subprocess goes through this, so jobs
+    wait for each other instead.
+    """
+    store.mkdir(parents=True, exist_ok=True)
+    with open(store.parent / f".{store.name}.lock", "w") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)

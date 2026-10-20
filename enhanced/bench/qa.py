@@ -31,7 +31,14 @@ from cognee.eval_framework.locomo.metrics.llm_judge import (
 )
 from enhanced.bench.locomo_worker import QA_PROMPT_PATH
 from enhanced.bench.metrics import paired_bootstrap
-from enhanced.bench.profiles import ANSWER_ENV, CACHE_DIR, RESULTS_DIR, profile_env, store_dir
+from enhanced.bench.profiles import (
+    ANSWER_ENV,
+    CACHE_DIR,
+    RESULTS_DIR,
+    profile_env,
+    store_dir,
+    store_lock,
+)
 from enhanced.bench.run import REPO, _convs, _git
 from enhanced.bench.variants import VARIANTS
 
@@ -144,27 +151,28 @@ def main() -> None:
             env = profile_env(args.profile, store)
             env.update(ANSWER_ENV)
             env.update(VARIANTS[variant]["env"])
-            subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "enhanced.bench.locomo_worker",
-                    "qa",
-                    "--conv",
-                    str(conv),
-                    "--store",
-                    str(store),
-                    "--variant",
-                    variant,
-                    "--qids",
-                    str(qids_file),
-                    "--out",
-                    str(out),
-                ],
-                env=env,
-                cwd=REPO,
-                check=True,
-            )
+            with store_lock(store):
+                subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "enhanced.bench.locomo_worker",
+                        "qa",
+                        "--conv",
+                        str(conv),
+                        "--store",
+                        str(store),
+                        "--variant",
+                        variant,
+                        "--qids",
+                        str(qids_file),
+                        "--out",
+                        str(out),
+                    ],
+                    env=env,
+                    cwd=REPO,
+                    check=True,
+                )
             rows[variant].extend(json.loads(line) for line in out.read_text().splitlines())
 
     for variant in variants:

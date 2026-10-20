@@ -61,3 +61,27 @@ def test_within_budget_stops_at_the_first_overflowing_window():
     assert within_budget([1, 2, 3], tokens, 1000) == ([1], 400)
     assert within_budget([1, 3, 2], tokens, 1200) == ([1, 3, 2], 1200)
     assert within_budget([], tokens, 1000) == ([], 0)
+
+
+def test_store_lock_serialises_holders(tmp_path):
+    import threading
+    import time
+
+    from enhanced.bench.profiles import store_lock
+
+    events = []
+
+    def hold(name, delay):
+        with store_lock(tmp_path / "store"):
+            events.append(f"{name}+")
+            time.sleep(delay)
+            events.append(f"{name}-")
+
+    first = threading.Thread(target=hold, args=("a", 0.3))
+    first.start()
+    time.sleep(0.05)
+    second = threading.Thread(target=hold, args=("b", 0))
+    second.start()
+    first.join()
+    second.join()
+    assert events == ["a+", "a-", "b+", "b-"]

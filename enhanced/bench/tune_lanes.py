@@ -23,7 +23,7 @@ from pathlib import Path
 
 from cognee.modules.retrieval.hybrid.ranking import rank_chunk_summary_pairs
 from enhanced.bench.metrics import question_metrics
-from enhanced.bench.profiles import CACHE_DIR, RESULTS_DIR, profile_env, store_dir
+from enhanced.bench.profiles import CACHE_DIR, RESULTS_DIR, profile_env, store_dir, store_lock
 from enhanced.bench.run import REPO, _convs, _git
 from enhanced.bench.variants import DEPTH
 
@@ -43,7 +43,8 @@ def dump(profile: str, convs: list[int]) -> None:
         store = store_dir("locomo", profile, f"conv{conv}")
         cmd = [sys.executable, "-m", "enhanced.bench.locomo_worker", "lanes", "--conv", str(conv)]
         cmd += ["--store", str(store), "--out", str(out) + ".tmp"]
-        subprocess.run(cmd, env=profile_env(profile, store), cwd=REPO, check=True)
+        with store_lock(store):
+            subprocess.run(cmd, env=profile_env(profile, store), cwd=REPO, check=True)
         (out.parent / (out.name + ".tmp")).rename(out)
 
 

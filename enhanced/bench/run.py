@@ -17,7 +17,14 @@ import sys
 from pathlib import Path
 
 from enhanced.bench.metrics import aggregate
-from enhanced.bench.profiles import CACHE_DIR, ENHANCED_DIR, RESULTS_DIR, profile_env, store_dir
+from enhanced.bench.profiles import (
+    CACHE_DIR,
+    ENHANCED_DIR,
+    RESULTS_DIR,
+    profile_env,
+    store_dir,
+    store_lock,
+)
 from enhanced.bench.variants import VARIANTS
 
 REPO = ENHANCED_DIR.parent
@@ -36,7 +43,8 @@ def _worker(profile: str, store: Path, extra_env: dict, *args) -> None:
     env = profile_env(profile, store)
     env.update(extra_env)
     cmd = [sys.executable, "-m", "enhanced.bench.locomo_worker", *args, "--store", str(store)]
-    subprocess.run(cmd, env=env, cwd=REPO, check=True)
+    with store_lock(store):
+        subprocess.run(cmd, env=env, cwd=REPO, check=True)
 
 
 def _git(*args) -> str:

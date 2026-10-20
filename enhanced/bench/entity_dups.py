@@ -23,7 +23,14 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from enhanced.bench.profiles import ANSWER_ENV, CACHE_DIR, RESULTS_DIR, profile_env, store_dir
+from enhanced.bench.profiles import (
+    ANSWER_ENV,
+    CACHE_DIR,
+    RESULTS_DIR,
+    profile_env,
+    store_dir,
+    store_lock,
+)
 from enhanced.bench.run import REPO, _convs, _git
 
 STOP = {"the", "a", "an", "of", "and", "s", "in", "on", "at", "to", "for", "with", "his", "her"}
@@ -78,12 +85,13 @@ def dump(profile: str, convs: list[int]) -> None:
             continue
         out.parent.mkdir(parents=True, exist_ok=True)
         store = store_dir("locomo", profile, f"conv{conv}")
-        subprocess.run(
-            [sys.executable, "-c", DUMP_SCRIPT, str(out)],
-            env=profile_env(profile, store),
-            cwd=REPO,
-            check=True,
-        )
+        with store_lock(store):
+            subprocess.run(
+                [sys.executable, "-c", DUMP_SCRIPT, str(out)],
+                env=profile_env(profile, store),
+                cwd=REPO,
+                check=True,
+            )
 
 
 def _tokens(name: str) -> set[str]:
