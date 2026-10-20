@@ -28,6 +28,19 @@ VARIANTS = {
         },
         "env": {},
     },
+    # H2: H1 with lane weights tuned on haiku dev convs 0-4
+    # (results/locomo/H2-tune-haiku.json): dense chunk 0, dense summary 0.25, lexical 1.
+    "hybrid_bm25_w_haiku": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": DEPTH,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "lexical_lane": True,
+            "chunk_lane_weights": [0.0, 0.25, 1.0],
+        },
+        "env": {},
+    },
     # Ablation: hybrid without the dense summary lane.
     "hybrid_nosum": {
         "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
