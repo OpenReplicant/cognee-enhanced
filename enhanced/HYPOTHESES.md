@@ -228,6 +228,22 @@ Gaps confirmed in the code (v1.6.5):
   The full top-20 context is about 6.5k passage tokens. The open question
   is whether answers hold up when it is cut to ~2-4k by a score-gap rule.
 
+### H4a: At a small context, ranking quality reaches the answers
+- **Status:** registered
+- **Observation:** with 20 passages (~6.5k tokens) in the prompt, answer
+  accuracy hardly responds to ranking: +18 pt recall@5 moved answers +2 pt
+  (n.s.) (`QA-det-haiku.json`).
+- **Claim:** with 5 passages, the ranking decides what the reader sees.
+  (1) H1 + rerank beats upstream hybrid at the same k. (2) H1 + rerank at
+  k=5 comes close to hybrid at k=20 with about a quarter of the passage
+  tokens.
+- **Variants:** `hybrid_k5`, `hybrid_bm25_k5`, `hybrid_bm25_rr_minilm_k5`
+  (pool 30 → rerank → 5); entity and fact lanes unchanged at 20 so only the
+  passage count moves. Same 300 test questions as `QA-det-haiku`, haiku
+  answering and judging, deterministic contexts.
+- **Prediction:** (1) rerank_k5 − hybrid_k5 ≥ +5 pt answer accuracy, CI
+  above 0. (2) rerank_k5 within 3 pt of hybrid at k=20 (0.680).
+
 ### H5: A learned query router beats fixed hybrid
 - **Status:** proposed (needs ≥3 accepted or measured variants first)
 - **Claim:** A light router (kNN over question embeddings → best variant,

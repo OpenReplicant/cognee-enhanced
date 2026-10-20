@@ -138,6 +138,34 @@ VARIANTS = {
         },
         "env": {},
     },
+    # H4a: five passages instead of twenty; entity and fact lanes unchanged.
+    "hybrid_k5": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {"chunks_top_k": 5, "entities_top_k": 20, "facts_top_k": 20},
+        "env": {},
+    },
+    "hybrid_bm25_k5": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": 5,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "lexical_lane": True,
+        },
+        "env": {},
+    },
+    "hybrid_bm25_rr_minilm_k5": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": 5,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "lexical_lane": True,
+            "rerank_top_n": 30,
+            "rerank_model": "Xenova/ms-marco-MiniLM-L-6-v2",
+        },
+        "env": {},
+    },
     # Single dense lane over chunks.
     "chunks": {
         "retriever": "cognee.modules.retrieval.chunks_retriever:ChunksRetriever",
