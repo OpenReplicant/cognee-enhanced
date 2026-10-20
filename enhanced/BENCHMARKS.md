@@ -222,3 +222,30 @@ prompts differed and the proxy cache missed (704 of 900 calls). Fixed in
 **Decision:** neither QA run supports a conclusion. Rerun on the fixed code
 with 60 questions per conversation, then repeat once to confirm it replays
 from cache.
+
+## 2026-10-20 · QA on deterministic contexts (T1) · haiku · convs 5-9 · n=300
+
+60 questions per test conversation (seed 0), deterministic hybrid context
+(fix `5b9cd17c9`). The run started at `9178cc327` and finished at `7145361c6`;
+the result reads `dirty` because the uncommitted PPR/graph-cache refactor was
+on disk for later workers (lexical-lane behaviour unchanged by tests; a
+cache-replay repeat run is the end-to-end check). File:
+`results/locomo-qa/QA-det-haiku.json`.
+
+| category | hybrid | hybrid_bm25 | hybrid_bm25_rr_minilm |
+|---|---:|---:|---:|
+| adversarial | 0.296 | 0.310 | 0.352 |
+| multi_hop | 0.744 | 0.767 | 0.698 |
+| single_hop | 0.892 | 0.854 | 0.908 |
+| temporal | 0.625 | 0.625 | 0.661 |
+| **all** | **0.680** | **0.670** | **0.700** |
+
+hybrid_bm25 vs hybrid −0.010 [−0.060, +0.037]; rerank vs hybrid +0.020
+[−0.030, +0.070]; rerank vs hybrid_bm25 +0.030 [−0.020, +0.080]. Nothing
+significant.
+
+**Reading:** with 20 chunks (~6.5k passage tokens) in the prompt, answer
+accuracy hardly responds to ranking (+18 pt recall@5 here moves answers by
++2 pt n.s.). The evidence is almost always in the 20 and the reader finds it.
+Next: QA at a small context (`chunks_top_k=5`), where ranking should
+matter. That is also the first H4 test.
