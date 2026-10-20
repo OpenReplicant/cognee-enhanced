@@ -34,3 +34,21 @@ uv run python -m enhanced.bench.compare \
 Takeaway: under keyless summaries, the summary lane lowers hybrid below
 dense chunks alone. This led to registering H1b and to H2's split
 prediction. Decisions use conversations 5-9.
+
+## 2026-10-20 · exploratory · H3 cross-encoder rerank · conv 0 · keyless
+
+Not a decision. Conv 0 (dev split), code at `cc9c272a7`; two ingests were
+saturating the 4 cores, so latency here is an upper bound, not a measurement.
+The bge-reranker-base run was stopped unfinished. File:
+`results/locomo/exploratory/H3-conv0.json`.
+
+| variant | R@5 | R@10 | MRR | p50 / p95 latency |
+|---|---:|---:|---:|---:|
+| hybrid_bm25 (H1) | 0.716 | 0.820 | 0.663 | 0.27 / 0.42 s |
+| hybrid_bm25_pool30 (control) | 0.756 | 0.797 | 0.667 | 0.30 / 0.55 s |
+| hybrid_bm25_rr_minilm | **0.866** | **0.915** | **0.786** | 6.5 / 9.9 s |
+
+MiniLM vs control: R@5 +0.110 [+0.054, +0.168], MRR +0.120 [+0.070, +0.170],
+37 wins / 12 losses (R@5). Quality is far above the registered prediction.
+Latency on a contended CPU is far over the 400 ms budget. Next: measure on an
+idle machine before the test-split decision.
