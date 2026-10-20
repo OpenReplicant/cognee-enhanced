@@ -177,3 +177,20 @@ single_hop +0.057, adversarial +0.050, temporal +0.029 (n.s.), open_domain
 data showed the same multi_hop drop (−0.033), so the follow-up H2b constrains
 the tuning objective per category. That is a second, adaptive use of this
 test split.
+
+## 2026-10-20 · H2b rejected (haiku) · convs 5-9 · second use of the test split
+
+Constrained dev tuning at `fe5377f24`
+(`results/locomo/H2-tune-haiku-maxdrop0.01.json`: best eligible (0.5, 0.25, 1),
+dev R@5 0.7927, worst category −0.006). Test run at `ebb007154` (clean), file
+`results/locomo/H2b-test-haiku.json`.
+
+| variant | R@5 | R@10 | MRR | R@1k tok |
+|---|---:|---:|---:|---:|
+| hybrid_bm25 (H1) | 0.744 | 0.830 | 0.652 | 0.689 |
+| hybrid_bm25_w2_haiku (0.5, 0.25, 1) | 0.749 | 0.827 | 0.663 | 0.709 |
+
+R@5 +0.005 [−0.007, +0.018]; multi_hop −0.038 [−0.072, −0.003].
+
+**Decision:** rejected. Lane-weight tuning is closed on this data. Equal
+weights stay.

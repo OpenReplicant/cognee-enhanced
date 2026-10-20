@@ -141,7 +141,7 @@ Gaps confirmed in the code (v1.6.5):
   in this run.)
 
 ### H2b: Category-constrained lane weights
-- **Status:** registered
+- **Status:** rejected (haiku). Lane-weight tuning closed on this data.
 - **Claim:** Weights chosen on dev to maximise recall@5 *subject to no
   category losing more than 1 pt vs equal weights on dev* improve test
   recall@5 over H1 without a significant regression in any category.
@@ -152,6 +152,16 @@ Gaps confirmed in the code (v1.6.5):
 - **Caveat:** this is the test split's second use for lane weights. H2's
   test result motivated the constraint, which is adaptive reuse; the ledger
   says so. A fresh check needs other data (LongMemEval / another profile).
+- **Result (haiku, n=982, `H2b-test-haiku.json`):** dev-constrained weights
+  (0.5, 0.25, 1). R@5 +0.5 pt [−0.7, +1.8] (prediction +1.5); MRR +1.1
+  [+0.0, +2.1]; **multi_hop −3.8 pt [−7.2, −0.3]** again, though dev showed
+  only −0.5. Rejected.
+- **Conclusion for H2/H2b:** on this data, down-weighting the dense lanes
+  reliably trades multi-hop for single-hop, and the 140-question multi-hop
+  slice is too small for a dev constraint to transfer. More tuning here would
+  fit the test split. Equal-weight RRF stays. The multi-hop-safe gains so far
+  come from reranking (H3: multi_hop +6.8 R@5), which reorders by
+  query-passage relevance instead of by lane.
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
 - **Status:** quality accepted (haiku, MiniLM); latency verdict pending an idle-machine measurement
