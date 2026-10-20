@@ -60,10 +60,119 @@ def test_pairs_without_a_lexical_rank_key_still_rank():
 async def test_search_lexical_is_off_at_zero_limit_and_fails_open(monkeypatch):
     assert await hybrid_chunks.search_lexical("q", 0) == []
 
-    async def boom(self, query):
+    async def boom():
         raise RuntimeError("graph unreadable")
 
-    from cognee.modules.retrieval.bm25_retriever import BM25ChunksRetriever
-
-    monkeypatch.setattr(BM25ChunksRetriever, "get_retrieved_objects", boom)
+    monkeypatch.setattr(hybrid_chunks, "_lexical_index", boom)
     assert await hybrid_chunks.search_lexical("q", 5) == []
+
+
+class _Graph:
+    __slots__ = ("counts", "fail", "key")  # like _GraphEngineHandle: no weak references
+
+    def __init__(self, counts=(3, 2), fail=False):
+        self.counts = counts
+        self.fail = fail
+        self.key = "db-1"
+
+    async def get_graph_counts(self):
+        if self.fail:
+            raise RuntimeError("no counts")
+        return self.counts
+
+
+class _Index:
+    built = 0
+
+    def __init__(self, with_scores=False):
+        _Index.built += 1
+
+    async def initialize(self):
+        pass
+
+    async def get_retrieved_objects(self, query, *, top_k=None):
+        return [({"id": "a"}, 1.0)][:top_k]
+
+
+@pytest.fixture
+def lexical_env(monkeypatch):
+    import cognee.infrastructure.databases.graph as graph_pkg
+    from cognee.modules.retrieval import bm25_retriever
+
+    graph = _Graph()
+
+    async def get_graph_engine():
+        return graph
+
+    _Index.built = 0
+    monkeypatch.setattr(graph_pkg, "get_graph_engine", get_graph_engine)
+    monkeypatch.setattr(bm25_retriever, "BM25ChunksRetriever", _Index)
+    monkeypatch.setattr(hybrid_chunks, "_lexical_indexes", hybrid_chunks.OrderedDict())
+    monkeypatch.setattr(hybrid_chunks, "_graph_key", lambda: graph.key)
+    return graph
+
+
+@pytest.mark.asyncio
+async def test_lexical_index_is_reused_while_the_graph_is_unchanged(lexical_env):
+    assert await hybrid_chunks.search_lexical("q", 5) == [({"id": "a"}, 1.0)]
+    await hybrid_chunks.search_lexical("q", 5)
+
+    assert _Index.built == 1
+
+
+@pytest.mark.asyncio
+async def test_lexical_index_is_rebuilt_when_the_graph_changes(lexical_env):
+    await hybrid_chunks.search_lexical("q", 5)
+    lexical_env.counts = (4, 2)
+    await hybrid_chunks.search_lexical("q", 5)
+
+    assert _Index.built == 2
+
+
+@pytest.mark.asyncio
+async def test_lexical_index_is_rebuilt_after_the_ttl(lexical_env, monkeypatch):
+    await hybrid_chunks.search_lexical("q", 5)
+    monkeypatch.setattr(hybrid_chunks, "LEXICAL_INDEX_TTL_SECONDS", -1.0)
+    await hybrid_chunks.search_lexical("q", 5)
+
+    assert _Index.built == 2
+
+
+@pytest.mark.asyncio
+async def test_lexical_index_is_not_cached_without_graph_counts(lexical_env):
+    lexical_env.fail = True
+    await hybrid_chunks.search_lexical("q", 5)
+    await hybrid_chunks.search_lexical("q", 5)
+
+    assert _Index.built == 2
+
+
+@pytest.mark.asyncio
+async def test_lexical_index_is_per_database(lexical_env):
+    await hybrid_chunks.search_lexical("q", 5)
+    lexical_env.key = "db-2"
+    await hybrid_chunks.search_lexical("q", 5)
+    lexical_env.key = "db-1"
+    await hybrid_chunks.search_lexical("q", 5)
+
+    assert _Index.built == 2
+
+
+@pytest.mark.asyncio
+async def test_lexical_index_cache_is_bounded(lexical_env, monkeypatch):
+    monkeypatch.setattr(hybrid_chunks, "LEXICAL_INDEX_MAX_ENTRIES", 2)
+    for key in ("a", "b", "c"):
+        lexical_env.key = key
+        await hybrid_chunks.search_lexical("q", 5)
+
+    assert list(hybrid_chunks._lexical_indexes) == ["b", "c"]
+
+
+def test_graph_key_follows_the_graph_context_config(monkeypatch):
+    from cognee.infrastructure.databases.graph import config as graph_config
+
+    monkeypatch.setattr(graph_config, "get_graph_context_config", lambda: {"path": "/a"})
+    first = hybrid_chunks._graph_key()
+    monkeypatch.setattr(graph_config, "get_graph_context_config", lambda: {"path": "/b"})
+
+    assert hybrid_chunks._graph_key() != first

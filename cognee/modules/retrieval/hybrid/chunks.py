@@ -1,4 +1,8 @@
 import asyncio
+import hashlib
+import json
+import time
+from collections import OrderedDict
 from collections.abc import Iterable
 from itertools import chain
 from typing import Any
@@ -118,6 +122,55 @@ async def retrieve_hybrid_chunks(
     }
 
 
+# One BM25 index per graph database, reused while the graph's node and edge
+# counts are unchanged and the entry is younger than the TTL (the TTL covers an
+# edit that leaves both counts equal). Keyed by a hash of the graph context
+# config, which is what identifies the database (``get_graph_engine`` returns
+# a fresh handle per call); a small LRU bounds the memory.
+LEXICAL_INDEX_TTL_SECONDS = 300.0
+LEXICAL_INDEX_MAX_ENTRIES = 16
+_lexical_indexes: "OrderedDict[str, tuple]" = OrderedDict()
+
+
+def _graph_key() -> str:
+    from cognee.infrastructure.databases.graph.config import get_graph_context_config
+
+    config = json.dumps(get_graph_context_config(), sort_keys=True, default=str)
+    return hashlib.sha256(config.encode()).hexdigest()
+
+
+async def _lexical_index():
+    from cognee.infrastructure.databases.graph import get_graph_engine
+    from cognee.modules.retrieval.bm25_retriever import BM25ChunksRetriever
+
+    key = _graph_key()
+    graph_engine = await get_graph_engine()
+    try:
+        counts = await graph_engine.get_graph_counts()
+    except Exception:
+        # Cannot tell whether the graph changed, so never reuse an index.
+        logger.info("Graph counts unavailable; lexical index not cached", exc_info=True)
+        counts = None
+    entry = _lexical_indexes.get(key)
+    now = time.monotonic()
+    if (
+        entry is not None
+        and counts is not None
+        and entry[0] == counts
+        and now - entry[1] < LEXICAL_INDEX_TTL_SECONDS
+    ):
+        _lexical_indexes.move_to_end(key)
+        return entry[2]
+    index = BM25ChunksRetriever(with_scores=True)
+    await index.initialize()
+    if counts is not None:
+        _lexical_indexes[key] = (counts, now, index)
+        _lexical_indexes.move_to_end(key)
+        while len(_lexical_indexes) > LEXICAL_INDEX_MAX_ENTRIES:
+            _lexical_indexes.popitem(last=False)
+    return index
+
+
 async def search_lexical(query: str, limit: int) -> list[tuple[dict, float]]:
     """BM25 over every DocumentChunk, as ``(payload, score)`` pairs; empty when off.
 
@@ -126,10 +179,9 @@ async def search_lexical(query: str, limit: int) -> list[tuple[dict, float]]:
     """
     if limit <= 0:
         return []
-    from cognee.modules.retrieval.bm25_retriever import BM25ChunksRetriever
-
     try:
-        return await BM25ChunksRetriever(top_k=limit, with_scores=True).get_retrieved_objects(query)
+        index = await _lexical_index()
+        return await index.get_retrieved_objects(query, top_k=limit)
     except Exception:
         logger.warning("Hybrid lexical lane failed; continuing without it", exc_info=True)
         return []

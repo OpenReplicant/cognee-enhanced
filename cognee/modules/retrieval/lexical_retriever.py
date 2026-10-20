@@ -99,8 +99,12 @@ class LexicalRetriever(BaseRetriever):
             self._initialized = True
             logger.info("Initialized with %d document chunks", len(self.chunks))
 
-    async def get_retrieved_objects(self, query: str) -> Any:
-        """Retrieves relevant chunks for the given query."""
+    async def get_retrieved_objects(self, query: str, *, top_k: int | None = None) -> Any:
+        """Retrieves relevant chunks for the given query.
+
+        ``top_k`` overrides the instance's limit for this call only, so one
+        initialized retriever can serve callers with different limits.
+        """
         if not self._initialized:
             await self.initialize()
 
@@ -130,7 +134,7 @@ class LexicalRetriever(BaseRetriever):
                 score = 0.0
             results.append((chunk_id, score))
 
-        top_results = nlargest(self.top_k, results, key=lambda x: x[1])
+        top_results = nlargest(top_k or self.top_k, results, key=lambda x: x[1])
         logger.info(
             "Retrieved %d/%d chunks for query (len=%d)",
             len(top_results),
