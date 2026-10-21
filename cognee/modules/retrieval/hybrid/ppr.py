@@ -52,14 +52,44 @@ async def walk_graph() -> WalkGraph:
     return await graph_cache.cached_for_graph("ppr", _build_walk_graph)
 
 
+def personalized_pagerank(
+    graph, personalization: dict[str, float], alpha: float = DAMPING, tol: float = 1e-6
+) -> dict[str, float]:
+    """PageRank with restart to ``personalization`` on an unweighted undirected graph.
+
+    Same semantics as ``networkx.pagerank`` (dangling mass returns to the
+    personalization vector; stops when the L1 change is below ``len(graph) *
+    tol``) without its scipy dependency, which cognee does not install.
+    """
+    total = sum(personalization.values())
+    restart = {node: weight / total for node, weight in personalization.items()}
+    nodes = list(graph.nodes)
+    degree = {node: graph.degree(node) for node in nodes}
+    scores = dict.fromkeys(nodes, 0.0)
+    scores.update(restart)
+    for _ in range(100):
+        dangling = alpha * sum(scores[node] for node in nodes if degree[node] == 0)
+        updated = dict.fromkeys(nodes, 0.0)
+        for node in nodes:
+            if degree[node]:
+                share = alpha * scores[node] / degree[node]
+                for neighbour in graph.neighbors(node):
+                    updated[neighbour] += share
+        for node, weight in restart.items():
+            updated[node] += (dangling + 1.0 - alpha) * weight
+        change = sum(abs(updated[node] - scores[node]) for node in nodes)
+        scores = updated
+        if change < len(nodes) * tol:
+            break
+    return scores
+
+
 def rank_chunks(walk: WalkGraph, seeds: dict[str, float], limit: int) -> list[str]:
     """Chunk ids by PPR mass from ``seeds`` (node id -> weight), best first."""
-    import networkx as nx
-
     personalization = {node: weight for node, weight in seeds.items() if node in walk.graph}
     if not personalization or limit <= 0:
         return []
-    scores = nx.pagerank(walk.graph, alpha=DAMPING, personalization=personalization)
+    scores = personalized_pagerank(walk.graph, personalization)
     ranked = sorted(
         (node for node in walk.chunk_ids if scores.get(node, 0.0) > 0.0),
         key=lambda node: (-scores[node], node),

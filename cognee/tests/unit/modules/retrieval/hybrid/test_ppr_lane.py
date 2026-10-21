@@ -96,3 +96,37 @@ def test_three_lane_weights_still_accepted_with_the_ppr_lane():
     )
 
     assert [pair["chunk_id"] for pair in ranked] == ["a"]
+
+
+def test_personalized_pagerank_matches_networkx_when_scipy_is_present():
+    networkx = pytest.importorskip("networkx")
+    pytest.importorskip("scipy")
+
+    graph = networkx.karate_club_graph()
+    graph = networkx.relabel_nodes(graph, str)
+    graph.add_node("isolated")
+    seeds = {"0": 1.0, "33": 0.5, "isolated": 0.25}
+
+    ours = ppr.personalized_pagerank(graph, seeds, alpha=0.5, tol=1e-10)
+    theirs = networkx.pagerank(graph, alpha=0.5, personalization=seeds, tol=1e-10, weight=None)
+
+    assert all(abs(ours[node] - theirs[node]) < 1e-6 for node in graph)
+
+
+def test_personalized_pagerank_needs_no_scipy(monkeypatch):
+    import builtins
+
+    real_import = builtins.__import__
+
+    def no_scipy(name, *args, **kwargs):
+        if name.split(".")[0] == "scipy":
+            raise ModuleNotFoundError("No module named 'scipy'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", no_scipy)
+    import networkx
+
+    graph = networkx.path_graph(["a", "b", "c"])
+    scores = ppr.personalized_pagerank(graph, {"a": 1.0})
+
+    assert scores["a"] > scores["b"] > scores["c"] > 0
