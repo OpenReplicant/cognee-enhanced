@@ -49,6 +49,15 @@ upstream; record the flip in `BENCHMARKS.md`. Changes that look upstreamable
 (self-contained bug fixes such as the deterministic hybrid context) get a
 note in their ledger entry, not a PR.
 
+### CI
+
+`.github/workflows/enhanced_ci.yml` runs ruff and the unit tests for
+`enhanced/` and the retrieval modules on pushes to `main` and `claude/**`
+and on pull requests to `main`. Upstream's workflows stay in the tree, since
+deleting them would conflict on every upstream merge. Disable the ones that
+fire on `main` (Docker Hub, release, canary, scorecard, test suites) in the
+repository's Actions settings instead.
+
 ### Acceptance rule
 
 - The primary metric's paired-bootstrap 95% CI lower bound is above 0 on the

@@ -1,0 +1,45 @@
+name: Enhanced CI
+# Fork CI for cognee-enhanced: lint and unit tests for the fork's own code and
+# the retrieval modules it changes. Upstream's workflows stay in the tree so
+# upstream merges stay clean; disable them in the repository's Actions
+# settings rather than deleting them (see enhanced/README.md).
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ENV: dev
+      LOG_LEVEL: ERROR
+      TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7  # v10.2.0
+        with:
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --extra dev --python 3.13
+
+      - name: Lint
+        run: |
+          uv run ruff check enhanced cognee/modules/retrieval cognee/tests/unit/modules/retrieval
+          uv run ruff format --check enhanced cognee/modules/retrieval cognee/tests/unit/modules/retrieval
+
+      - name: Unit tests
+        run: uv run pytest enhanced/tests cognee/tests/unit/modules/retrieval -q -p no:cacheprovider
