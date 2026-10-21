@@ -155,12 +155,14 @@ def retry_client(monkeypatch):
     unscripted returns no results.
     """
     calls: list[SearchType] = []
+    configs: list[dict | None] = []
     logged: list[str] = []
     script: dict[SearchType, object] = {}
 
     async def fake_authorized_search(*args, **kwargs):
         query_type = kwargs["query_type"]
         calls.append(query_type)
+        configs.append(kwargs.get("retriever_specific_config"))
         outcome = script.get(query_type, [])
         if isinstance(outcome, Exception):
             raise outcome
@@ -179,7 +181,9 @@ def retry_client(monkeypatch):
         "log_search_history",
         fake_log_search_history,
     )
-    return SimpleNamespace(client=_build_client(), calls=calls, logged=logged, script=script)
+    return SimpleNamespace(
+        client=_build_client(), calls=calls, configs=configs, logged=logged, script=script
+    )
 
 
 _GRAPH_HIT = [
@@ -297,6 +301,59 @@ def test_no_llm_configured_picks_chunks_before_the_router(retry_client, monkeypa
 
     assert response.status_code == 200, response.text
     assert retry_client.calls == [SearchType.CHUNKS]
+
+
+def test_keyless_default_chunks_fuses_bm25(retry_client, monkeypatch):
+    """Fork default (H1b): the keyless CHUNKS pick asks for vector + BM25 fusion."""
+    monkeypatch.setattr(
+        importlib.import_module("cognee.api.v1.recall.recall"),
+        "llm_available",
+        lambda _config: False,
+    )
+    monkeypatch.delenv("RECALL_KEYLESS_LEXICAL_FUSION", raising=False)
+
+    response = retry_client.client.post(
+        "/api/v1/recall", json={"query": "what did we decide?", "scope": "graph"}
+    )
+
+    assert response.status_code == 200, response.text
+    assert retry_client.calls == [SearchType.CHUNKS]
+    assert retry_client.configs[0]["lexical_fusion"] is True
+
+
+def test_keyless_lexical_fusion_can_be_switched_off(retry_client, monkeypatch):
+    monkeypatch.setattr(
+        importlib.import_module("cognee.api.v1.recall.recall"),
+        "llm_available",
+        lambda _config: False,
+    )
+    monkeypatch.setenv("RECALL_KEYLESS_LEXICAL_FUSION", "false")
+
+    response = retry_client.client.post(
+        "/api/v1/recall", json={"query": "what did we decide?", "scope": "graph"}
+    )
+
+    assert response.status_code == 200, response.text
+    assert retry_client.calls == [SearchType.CHUNKS]
+    assert not (retry_client.configs[0] or {}).get("lexical_fusion")
+
+
+def test_pinned_chunks_stays_vector_only_when_keyless(retry_client, monkeypatch):
+    """Fusion applies to the keyless default, not to an explicit CHUNKS."""
+    monkeypatch.setattr(
+        importlib.import_module("cognee.api.v1.recall.recall"),
+        "llm_available",
+        lambda _config: False,
+    )
+
+    response = retry_client.client.post(
+        "/api/v1/recall",
+        json={"query": "anything", "scope": "graph", "searchType": "CHUNKS"},
+    )
+
+    assert response.status_code == 200, response.text
+    assert retry_client.calls == [SearchType.CHUNKS]
+    assert not (retry_client.configs[0] or {}).get("lexical_fusion")
 
 
 def test_time_scoped_question_routes_to_temporal(retry_client):

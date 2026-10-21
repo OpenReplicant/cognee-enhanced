@@ -1,4 +1,5 @@
 import asyncio
+import os
 import re
 from uuid import UUID
 
@@ -51,6 +52,13 @@ from cognee.shared.logging_utils import get_logger
 from cognee.shared.utils import telemetry_on_error
 
 logger = get_logger("recall")
+
+
+def keyless_lexical_fusion_enabled() -> bool:
+    """Whether keyless recall's default CHUNKS pick fuses BM25 with vector search."""
+    value = os.getenv("RECALL_KEYLESS_LEXICAL_FUSION", "true").strip().lower()
+    return value not in ("0", "false", "no", "off")
+
 
 # Minimum word length to avoid matching noise words like "a", "I"
 _MIN_WORD_LEN = 2
@@ -654,6 +662,7 @@ async def recall(
                 # Set only when the router chose the type, so the retry below
                 # never second-guesses a pinned type or the no-LLM CHUNKS pick.
                 routed_rule = None
+                local_retriever_config = retriever_specific_config
 
                 if query_type is not None:
                     local_query_type = query_type
@@ -665,6 +674,15 @@ async def recall(
                     # with a key present answers completions fine. An explicit
                     # query_type still selects any search type.
                     local_query_type = SearchType.CHUNKS
+                    # Fork default (enhanced/HYPOTHESES.md H1b): fuse BM25 with the
+                    # vector search for this default pick; an explicit CHUNKS stays
+                    # vector-only. RECALL_KEYLESS_LEXICAL_FUSION=false restores
+                    # upstream behaviour.
+                    if keyless_lexical_fusion_enabled():
+                        local_retriever_config = {
+                            **(retriever_specific_config or {}),
+                            "lexical_fusion": True,
+                        }
                 elif auto_route:
                     decision = route_query(query_text)
                     local_query_type = decision.search_type
@@ -808,7 +826,7 @@ async def recall(
                         wide_search_top_k=wide_search_top_k,
                         triplet_distance_penalty=triplet_distance_penalty,
                         feedback_influence=feedback_influence,
-                        retriever_specific_config=retriever_specific_config,
+                        retriever_specific_config=local_retriever_config,
                         neighborhood_depth=neighborhood_depth,
                         neighborhood_seed_top_k=neighborhood_seed_top_k,
                         include_references=include_references,

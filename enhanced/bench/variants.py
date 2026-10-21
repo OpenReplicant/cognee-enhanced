@@ -186,6 +186,12 @@ VARIANTS = {
         "kwargs": {"top_k": DEPTH},
         "env": {},
     },
+    # H1b as shipped: keyless recall's default CHUNKS with vector + BM25 fusion.
+    "chunks_fused": {
+        "retriever": "cognee.modules.retrieval.chunks_retriever:ChunksRetriever",
+        "kwargs": {"top_k": DEPTH, "lexical_fusion": True},
+        "env": {},
+    },
     # Single lexical lane (BM25) over chunks.
     "bm25": {
         "retriever": "cognee.modules.retrieval.bm25_retriever:BM25ChunksRetriever",

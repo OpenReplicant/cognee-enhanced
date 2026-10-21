@@ -151,6 +151,7 @@ async def get_search_type_retriever_instance(
                 "top_k": top_k,
                 "node_name": node_name,
                 "node_name_filter_operator": node_name_filter_operator,
+                "lexical_fusion": bool(retriever_specific_config.get("lexical_fusion", False)),
             },
         ),
         # No top_k: BROAD reads the whole dataset (SDK-324).

@@ -184,6 +184,19 @@ async def test_chunks_retriever_receives_nodeset_filter_arguments():
 
 
 @pytest.mark.asyncio
+async def test_chunks_retriever_lexical_fusion_comes_from_retriever_config():
+    import cognee.modules.search.methods.get_search_type_retriever_instance as mod
+
+    default = await mod.get_search_type_retriever_instance(SearchType.CHUNKS, query_text="q")
+    fused = await mod.get_search_type_retriever_instance(
+        SearchType.CHUNKS, query_text="q", retriever_specific_config={"lexical_fusion": True}
+    )
+
+    assert default.lexical_fusion is False
+    assert fused.lexical_fusion is True
+
+
+@pytest.mark.asyncio
 async def test_rag_completion_retriever_receives_nodeset_filter_arguments():
     import cognee.modules.search.methods.get_search_type_retriever_instance as mod
     from cognee.modules.retrieval.completion_retriever import CompletionRetriever

@@ -92,7 +92,7 @@ Gaps confirmed in the code (v1.6.5):
   hybrid 0.700 / hybrid_bm25 0.747. Treat both QA runs as noisy draws.
 
 ### H1b: Keyless retrieval should fuse BM25 with dense chunks
-- **Status:** accepted (keyless, convs 5-9)
+- **Status:** accepted (keyless, convs 5-9); **fork default** since the flip recorded in BENCHMARKS.md
 - **Claim:** For keyless installs (where `recall()` already falls back to
   `CHUNKS`), dense-chunk + BM25 RRF beats dense chunks alone.
 - **Why:** The conv 0 exploration above. This needs no LLM, so it ships to

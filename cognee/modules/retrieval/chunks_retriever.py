@@ -36,6 +36,7 @@ class ChunksRetriever(BaseRetriever):
         top_k: int | None = 5,
         node_name: list[str] | None = None,
         node_name_filter_operator: str = "OR",
+        lexical_fusion: bool = False,
     ):
         """
         Initializes the chunk retriever.
@@ -50,8 +51,13 @@ class ChunksRetriever(BaseRetriever):
               node set filtering.
             - node_name_filter_operator (str): Logical operator used when applying
               multiple node_name filters, such as "OR" or "AND". Defaults to "OR".
+            - lexical_fusion (bool): Rank chunks by reciprocal-rank fusion of the
+              vector search and BM25 (the hybrid chunk lane without its summary
+              lane) instead of vector search alone. Defaults to False. Keyless
+              ``recall()`` turns it on (enhanced/HYPOTHESES.md H1b).
         """
         self.top_k = top_k
+        self.lexical_fusion = lexical_fusion
         self.node_name = node_name
         self.node_name_filter_operator = node_name_filter_operator
 
@@ -128,6 +134,11 @@ class ChunksRetriever(BaseRetriever):
         unified = await get_unified_engine()
         vector_engine = unified.vector
 
+        if self.lexical_fusion:
+            found_chunks = await self._fused_chunks(vector_engine, query)
+            await attach_chunk_conflicts(found_chunks, graph_engine=unified.graph)
+            return found_chunks
+
         try:
             found_chunks = await vector_engine.search(
                 "DocumentChunk_text",
@@ -143,4 +154,26 @@ class ChunksRetriever(BaseRetriever):
 
         logger.info(f"Found {len(found_chunks)} chunks from vector search")
         await attach_chunk_conflicts(found_chunks, graph_engine=unified.graph)
+        return found_chunks
+
+    async def _fused_chunks(self, vector_engine: Any, query: str) -> list[Any]:
+        """Vector + BM25 reciprocal-rank fusion through the hybrid chunk lane."""
+        from cognee.modules.retrieval.hybrid.chunks import retrieve_hybrid_chunks
+
+        try:
+            fused = await retrieve_hybrid_chunks(
+                vector_engine=vector_engine,
+                query=query,
+                chunks_top_k=self.top_k or 5,
+                text_summaries_top_k=0,
+                node_name=self.node_name,
+                node_name_filter_operator=self.node_name_filter_operator,
+                use_importance_weight=True,
+                lexical_lane=True,
+            )
+        except CollectionNotFoundError as error:
+            logger.error("DocumentChunk_text collection not found in vector database")
+            raise NoDataError("No data found in the system, please add data first.") from error
+        found_chunks = fused["chunks"]
+        logger.info(f"Found {len(found_chunks)} chunks from fused vector + BM25 search")
         return found_chunks

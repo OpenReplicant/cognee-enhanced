@@ -392,3 +392,16 @@ H1 vs hybrid: R@5 +0.076 [+0.057, +0.096]. No category regresses in either.
 
 **Decision:** H1b accepted. Keyless `recall()` (upstream: dense `CHUNKS`)
 is the place to use it; flip proposed as this fork's default.
+
+## 2026-10-21 · Default flip: keyless recall fuses BM25 with vector search (H1b)
+
+What changes: with no usable LLM key, `recall()` without a `query_type` still
+picks `CHUNKS`, but now passes `lexical_fusion=True`, so `ChunksRetriever`
+ranks by RRF of vector search and BM25 (the hybrid chunk lane without its
+summary lane). An explicit `query_type=CHUNKS` stays vector-only.
+`RECALL_KEYLESS_LEXICAL_FUSION=false` restores upstream behaviour.
+
+Evidence: H1b on keyless LoCoMo convs 5-9, R@5 0.620 → 0.735 (+11.6 pt),
+MRR +11.6 pt, no category regression, p95 +0.09 s; on LongMemEval the same
+fusion beat dense and BM25 alone. The shipped path (`chunks_fused` variant)
+reproduced all 158 conv-5 rankings of the benchmarked `hybrid_bm25_nosum`.
