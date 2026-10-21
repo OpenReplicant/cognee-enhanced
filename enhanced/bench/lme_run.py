@@ -14,9 +14,11 @@ import argparse
 import datetime
 import json
 import random
+import shutil
 import subprocess
 import sys
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 
 from enhanced.bench.longmemeval_worker import category, load_questions
 from enhanced.bench.metrics import aggregate
@@ -50,6 +52,7 @@ def main() -> None:
     parser.add_argument("--per-category", type=int, default=10)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--ingest-only", action="store_true")
+    parser.add_argument("--jobs", type=int, default=3, help="stores ingested concurrently")
     args = parser.parse_args()
     variants = args.variants.split(",")
     unknown = [v for v in variants if v not in VARIANTS]
@@ -59,13 +62,25 @@ def main() -> None:
     qids = sample(args.per_category, args.seed)
     run_dir = CACHE_DIR / "runs" / f"lme-{args.name}"
     run_dir.mkdir(parents=True, exist_ok=True)
+
+    def ingest(qid: str) -> None:
+        store = store_dir("longmemeval", PROFILE, qid)
+        if (store / "ingest_meta.json").exists():
+            return
+        # A store without its meta is an interrupted ingest; start it over.
+        shutil.rmtree(store, ignore_errors=True)
+        _worker(store, "ingest", "--qid", qid)
+
+    # Each question has its own store, so stores can be built concurrently.
+    with ThreadPoolExecutor(max_workers=args.jobs) as pool:
+        list(pool.map(ingest, qids))
+    if args.ingest_only:
+        print(f"stores ready for {len(qids)} questions")
+        return
+
     records = {v: [] for v in variants}
     for qid in qids:
         store = store_dir("longmemeval", PROFILE, qid)
-        if not (store / "ingest_meta.json").exists():
-            _worker(store, "ingest", "--qid", qid)
-        if args.ingest_only:
-            continue
         out = run_dir / f"{qid}.jsonl"
         if not out.exists():
             tmp = run_dir / f"{qid}.jsonl.tmp"
@@ -77,10 +92,6 @@ def main() -> None:
             row = json.loads(line)
             if row["variant"] in records:
                 records[row["variant"]].append(row)
-    if args.ingest_only:
-        print(f"stores ready for {len(qids)} questions")
-        return
-
     result = {
         "suite": "longmemeval-s-retrieval",
         "name": args.name,
