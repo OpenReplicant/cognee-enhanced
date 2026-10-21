@@ -180,6 +180,13 @@ VARIANTS = {
         },
         "env": {},
     },
+    # H3 as shipped: precise mode's constants (cognee/modules/retrieval/precise.py)
+    # on the hybrid retriever; must reproduce hybrid_bm25_rr_minilm.
+    "hybrid_precise": {
+        "retriever": "enhanced.bench.variants:precise_hybrid",
+        "kwargs": {"chunks_top_k": DEPTH, "entities_top_k": 20, "facts_top_k": 20},
+        "env": {},
+    },
     # Single dense lane over chunks.
     "chunks": {
         "retriever": "cognee.modules.retrieval.chunks_retriever:ChunksRetriever",
@@ -199,3 +206,11 @@ VARIANTS = {
         "env": {},
     },
 }
+
+
+def precise_hybrid(**kwargs):
+    """HybridRetriever with the kwargs the search factory adds in precise mode."""
+    from cognee.modules.retrieval.hybrid_retriever import HybridRetriever
+    from cognee.modules.retrieval.precise import precise_rerank_kwargs
+
+    return HybridRetriever(**kwargs, lexical_lane=True, **precise_rerank_kwargs(True))

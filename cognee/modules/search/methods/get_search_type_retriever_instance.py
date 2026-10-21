@@ -36,6 +36,7 @@ from cognee.modules.retrieval.graph_summary_completion_retriever import (
 )
 from cognee.modules.retrieval.hybrid_retriever import DEFAULT_HYBRID_LANE_TOP_K, HybridRetriever
 from cognee.modules.retrieval.natural_language_retriever import NaturalLanguageRetriever
+from cognee.modules.retrieval.precise import precise_rerank_kwargs, precise_retrieval_enabled
 from cognee.modules.retrieval.skills_retriever import SkillsRetriever
 from cognee.modules.retrieval.summaries_retriever import SummariesRetriever
 from cognee.modules.retrieval.temporal_hybrid_retriever import TemporalHybridRetriever
@@ -107,6 +108,8 @@ async def get_search_type_retriever_instance(
     retriever_specific_config = kwargs.get("retriever_specific_config")
     if retriever_specific_config is None:
         retriever_specific_config = {}
+    # Opt-in precise mode (cognee/modules/retrieval/precise.py).
+    precise = precise_retrieval_enabled(retriever_specific_config)
 
     # Extract common defaults with fallback values from kwargs
     top_k = kwargs.get("top_k", 15)
@@ -151,7 +154,9 @@ async def get_search_type_retriever_instance(
                 "top_k": top_k,
                 "node_name": node_name,
                 "node_name_filter_operator": node_name_filter_operator,
-                "lexical_fusion": bool(retriever_specific_config.get("lexical_fusion", False)),
+                "lexical_fusion": precise
+                or bool(retriever_specific_config.get("lexical_fusion", False)),
+                **precise_rerank_kwargs(precise),
             },
         ),
         # No top_k: BROAD reads the whole dataset (SDK-324).
@@ -219,6 +224,8 @@ async def get_search_type_retriever_instance(
                     "include_external_metadata", False
                 ),
                 "external_metadata_keys": retriever_specific_config.get("external_metadata_keys"),
+                **({"lexical_lane": True} if precise else {}),
+                **precise_rerank_kwargs(precise),
             },
         ),
         SearchType.GRAPH_COMPLETION: (

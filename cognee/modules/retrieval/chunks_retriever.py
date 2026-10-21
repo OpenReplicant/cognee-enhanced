@@ -37,6 +37,8 @@ class ChunksRetriever(BaseRetriever):
         node_name: list[str] | None = None,
         node_name_filter_operator: str = "OR",
         lexical_fusion: bool = False,
+        rerank_top_n: int | None = None,
+        rerank_model: str | None = None,
     ):
         """
         Initializes the chunk retriever.
@@ -55,9 +57,15 @@ class ChunksRetriever(BaseRetriever):
               vector search and BM25 (the hybrid chunk lane without its summary
               lane) instead of vector search alone. Defaults to False. Keyless
               ``recall()`` turns it on (enhanced/HYPOTHESES.md H1b).
+            - rerank_top_n / rerank_model (Optional): with lexical_fusion, pool the
+              fused chunks to max(top_k, rerank_top_n) and reorder them with this
+              local cross-encoder before the cut (precise mode,
+              cognee/modules/retrieval/precise.py).
         """
         self.top_k = top_k
         self.lexical_fusion = lexical_fusion
+        self.rerank_top_n = rerank_top_n
+        self.rerank_model = rerank_model
         self.node_name = node_name
         self.node_name_filter_operator = node_name_filter_operator
 
@@ -160,11 +168,12 @@ class ChunksRetriever(BaseRetriever):
         """Vector + BM25 reciprocal-rank fusion through the hybrid chunk lane."""
         from cognee.modules.retrieval.hybrid.chunks import retrieve_hybrid_chunks
 
+        top_k = self.top_k or 5
         try:
             fused = await retrieve_hybrid_chunks(
                 vector_engine=vector_engine,
                 query=query,
-                chunks_top_k=self.top_k or 5,
+                chunks_top_k=max(top_k, self.rerank_top_n or 0),
                 text_summaries_top_k=0,
                 node_name=self.node_name,
                 node_name_filter_operator=self.node_name_filter_operator,
@@ -175,5 +184,12 @@ class ChunksRetriever(BaseRetriever):
             logger.error("DocumentChunk_text collection not found in vector database")
             raise NoDataError("No data found in the system, please add data first.") from error
         found_chunks = fused["chunks"]
+        if self.rerank_model:
+            from cognee.modules.retrieval.hybrid.rerank import rerank_chunks
+
+            found_chunks = await rerank_chunks(
+                self.rerank_model, query, found_chunks, top_n=self.rerank_top_n
+            )
+        found_chunks = found_chunks[:top_k]
         logger.info(f"Found {len(found_chunks)} chunks from fused vector + BM25 search")
         return found_chunks
