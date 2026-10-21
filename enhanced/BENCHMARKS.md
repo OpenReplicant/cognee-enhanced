@@ -273,3 +273,24 @@ recall@5 −0.027 [−0.047, −0.007]; MRR −0.060 [−0.079, −0.040].
 
 **Decision:** rejected on LoCoMo (primary effect n.s., guard violated). The
 likely cause is speaker-entity hubs; H6 stays open for document multi-hop QA.
+
+## 2026-10-21 · H4a QA at five passages (T1) · haiku · n=300
+
+Same 300 questions as `QA-det-haiku`, deterministic contexts. Code at
+`2e890c720` (clean). File: `results/locomo-qa/H4a-qa-haiku.json`.
+
+| variant | passages | adversarial | multi_hop | single_hop | temporal | **all** | context chars |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| hybrid | 20 | 0.296 | 0.744 | 0.892 | 0.625 | **0.680** | 29.4k |
+| hybrid_bm25 | 20 | 0.310 | 0.767 | 0.854 | 0.625 | 0.670 | 29.7k |
+| hybrid_bm25_rr_minilm | 20 | 0.352 | 0.698 | 0.908 | 0.661 | 0.700 | 30.5k |
+| hybrid_k5 | 5 | 0.338 | 0.721 | 0.862 | 0.625 | 0.673 | 15.2k |
+| hybrid_bm25_k5 | 5 | 0.380 | 0.721 | 0.900 | 0.607 | 0.697 | 15.3k |
+| hybrid_bm25_rr_minilm_k5 | 5 | 0.437 | 0.744 | 0.877 | 0.607 | 0.703 | 15.6k |
+
+rerank_k5 vs hybrid_k5 +0.030 [−0.023, +0.083]; rerank_k5 vs hybrid@20
++0.023 [−0.033, +0.080]; hybrid_k5 vs hybrid@20 −0.007 [−0.057, +0.040].
+
+**Decision:** prediction (1) not met, (2) met. No default change from this
+alone. The flat 0.67-0.70 band points at the reader as the limit; next is
+error attribution.

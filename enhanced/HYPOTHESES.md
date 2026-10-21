@@ -229,7 +229,7 @@ Gaps confirmed in the code (v1.6.5):
   is whether answers hold up when it is cut to ~2-4k by a score-gap rule.
 
 ### H4a: At a small context, ranking quality reaches the answers
-- **Status:** registered
+- **Status:** partly confirmed: (1) not met, (2) met
 - **Observation:** with 20 passages (~6.5k tokens) in the prompt, answer
   accuracy hardly responds to ranking: +18 pt recall@5 moved answers +2 pt
   (n.s.) (`QA-det-haiku.json`).
@@ -243,6 +243,17 @@ Gaps confirmed in the code (v1.6.5):
   answering and judging, deterministic contexts.
 - **Prediction:** (1) rerank_k5 − hybrid_k5 ≥ +5 pt answer accuracy, CI
   above 0. (2) rerank_k5 within 3 pt of hybrid at k=20 (0.680).
+- **Result (`results/locomo-qa/H4a-qa-haiku.json`, n=300):** hybrid_k5
+  0.673, hybrid_bm25_k5 0.697, hybrid_bm25_rr_minilm_k5 0.703. (1)
+  rerank_k5 − hybrid_k5 = **+3.0 pt [−2.3, +8.3]**, not met. (2)
+  rerank_k5 − hybrid@20 = +2.3 pt [−3.3, +8.0], within 3 pt, met.
+  hybrid_k5 − hybrid@20 = −0.7 [−5.7, +4.0].
+- **Reading:** 5 passages instead of 20 cut the context only from 29.4k to
+  15.2k characters; the entity and fact lanes (20 each) are about half the
+  prompt. Every configuration so far answers 0.67-0.70, so the reader, not
+  retrieval, looks like the binding limit on LoCoMo with Haiku (adversarial
+  0.30-0.44, temporal 0.61-0.66). Next: per-question error attribution
+  (was the gold window in the context?).
 
 ### H5: A learned query router beats fixed hybrid
 - **Status:** proposed (needs ≥3 accepted or measured variants first)
