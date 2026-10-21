@@ -294,3 +294,34 @@ rerank_k5 vs hybrid_k5 +0.030 [−0.023, +0.083]; rerank_k5 vs hybrid@20
 **Decision:** prediction (1) not met, (2) met. No default change from this
 alone. The flat 0.67-0.70 band points at the reader as the limit; next is
 error attribution.
+
+## 2026-10-21 · Error attribution: most wrong answers had the evidence in context
+
+`bench/attribute.py` joins a QA run with the retrieval run of the same
+retriever (deterministic chunk lane) and asks, for each wrong answer, whether
+the gold windows were in the passages the reader saw. Entity and fact lines
+are not credited, so "no gold shown" is an upper bound on retrieval misses.
+
+| run | wrong | no gold shown | some gold shown | **all gold shown** |
+|---|---:|---:|---:|---:|
+| hybrid, k=20 (`QA-det-haiku`) | 96 | 14 | 8 | **74** |
+| hybrid, k=5 (`H4a-qa-haiku`) | 98 | 32 | 12 | **54** |
+| H1 + rerank, k=20 (`QA-det-haiku`) | 90 | 5 | 10 | **75** |
+
+By category (hybrid, k=20), wrong answers with all gold shown: adversarial
+46/50, temporal 12/21, single_hop 10/14, multi_hop 6/11 (5 more partial).
+
+```bash
+uv run python -m enhanced.bench.attribute \
+  enhanced/results/locomo-qa/QA-det-haiku.json:hybrid \
+  enhanced/results/locomo/H1-test-haiku.json:hybrid --k 20
+```
+
+**Reading:** with Haiku as the reader, about three quarters of LoCoMo errors
+happen after retrieval succeeded, and adversarial questions dominate (the
+reader answers about the wrong speaker instead of declining; upstream's
+gpt-5-mini reader scored 0.892 there with the same prompt). Retrieval gains
+can move at most ~15-20 of 300 answers here. They matter more where the
+evidence cannot all fit in the context (larger stores, BEAM-10M-like scale),
+and reader-side fixes (H14 abstention, an attribution check) target the
+larger error mass.
