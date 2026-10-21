@@ -340,3 +340,21 @@ the run itself (load ~3.8 = the reranker on 4 cores). File:
 Rerank rankings reproduced the earlier run exactly (987/987). p95 +1.91 s
 against a +0.40 s budget, so parked as registered; H3b tests a 12-chunk,
 800-char rerank.
+
+## 2026-10-21 · T0b-1: H1 / H3 on LongMemEval-S (fresh data) · chunks-only
+
+70 questions (10 per type incl. abstention, seed 0), one chunks-only store per
+question (~250 dated rounds, bge-small, no LLM: hybrid = dense chunks here).
+Session-level gold. Code at `f7d7cb702` (clean). File:
+`results/longmemeval/T0b-1.json`.
+
+| variant | R@1 | R@5 | all@5 | MRR | p95 |
+|---|---:|---:|---:|---:|---:|
+| hybrid (dense chunks) | 0.564 | 0.864 | 0.814 | 0.880 | (cold start) |
+| hybrid_bm25 (H1) | 0.556 | 0.886 | 0.829 | 0.895 | 0.30 s |
+| bm25 | 0.555 | 0.837 | 0.771 | 0.853 | 0.07 s |
+| hybrid_bm25_pool30 | 0.556 | 0.886 | 0.829 | 0.894 | 0.28 s |
+| hybrid_bm25_rr_minilm (H3) | **0.642** | **0.934** | **0.886** | **0.957** | 2.27 s |
+
+H1: R@5 +0.021 [−0.021, +0.071], not replicated. H3: MRR +0.063 [+0.024,
++0.108], R@5 +0.049 [+0.013, +0.094], replicated.

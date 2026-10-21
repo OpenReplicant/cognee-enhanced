@@ -355,7 +355,7 @@ Gaps confirmed in the code (v1.6.5):
 - **Prediction:** +5 pt KU; no other category changes by more than 1 pt.
 
 ### T0b-1: H1 and H3 replicate on LongMemEval-S (fresh data)
-- **Status:** registered
+- **Status:** done: (1) H1 not replicated (n.s.), (2) H3 replicated, (3) half right
 - **Setup:** `bench/lme_run.py`, 70 questions (10 per type incl.
   abstention, seed 0), one chunks-only store per question (~247 dated rounds,
   ~120k tokens; no LLM, so hybrid's entity/summary lanes are empty and
@@ -369,6 +369,15 @@ Gaps confirmed in the code (v1.6.5):
   evidence sits in several sessions or changes over time.
 - **Why it matters:** these are the first numbers on data none of the
   choices were tuned on, with a haystack about 4× LoCoMo's.
+- **Result (`results/longmemeval/T0b-1.json`, clean `f7d7cb702`, n=70):**
+  (1) hybrid_bm25 − hybrid R@5 **+2.1 pt [−2.1, +7.1]**, not met (positive,
+  n.s.; dense retrieval already reaches MRR 0.88 at session level). (2)
+  rr_minilm − pool30 MRR **+6.3 pt [+2.4, +10.8]** (R@5 +4.9 [+1.3, +9.4];
+  R@1 0.556 → 0.642), met: H3's gain replicates on fresh data. (3)
+  multi-session gained least from BM25 (R@10 −7.5 n.s.), but knowledge-update
+  gained most (+10 R@5), so half right. Rerank p50 1.95 s / p95 2.27 s vs
+  0.25 / 0.28 s. The `hybrid` latency (4.5 s) includes each process's cold
+  start, because it runs first; ignore it.
 
 ## Tier M: component micro-benchmarks
 
