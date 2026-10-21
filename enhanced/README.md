@@ -66,6 +66,23 @@ parks any workflow upstream adds, and stops if real conflicts remain. Fork
 workflows must be named `enhanced_*.yml`. If the repository's Actions settings
 become reachable, disabling the upstream workflows there is an alternative.
 
+### Opt-in features
+
+Changes that pass on quality but miss their latency budget ship off by
+default, behind a switch, instead of being dropped.
+
+- **Precise mode** (H3, `cognee/modules/retrieval/precise.py`): for
+  `HYBRID_COMPLETION` and `CHUNKS`, adds the BM25 lane, pools the fused
+  chunks to 30 and reorders them with a local MiniLM cross-encoder (80 MB,
+  downloaded on first use) before the cut. Turn it on per call with
+  `retriever_specific_config={"precise": True}` (`recall()` and `search()`)
+  or per process with `COGNEE_PRECISE_RETRIEVAL=true`; the per-call value
+  wins. Costs about 1.9 s per query on 4 CPU cores. It improves ranking
+  (MRR +11 pt on held-out LoCoMo, +6 pt on LongMemEval-S), which helps
+  callers that read the ranked chunks themselves (`CHUNKS`, agents, small
+  `top_k`). Haiku's answer accuracy did not change significantly at 20 or
+  5 passages (+2 and +3 pt, both n.s.).
+
 ### Acceptance rule
 
 - The primary metric's paired-bootstrap 95% CI lower bound is above 0 on the

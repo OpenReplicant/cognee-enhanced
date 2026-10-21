@@ -405,3 +405,27 @@ Evidence: H1b on keyless LoCoMo convs 5-9, R@5 0.620 → 0.735 (+11.6 pt),
 MRR +11.6 pt, no category regression, p95 +0.09 s; on LongMemEval the same
 fusion beat dense and BM25 alone. The shipped path (`chunks_fused` variant)
 reproduced all 158 conv-5 rankings of the benchmarked `hybrid_bm25_nosum`.
+
+## 2026-10-21 · Shipped: H3 rerank as opt-in precise mode
+
+What changes: nothing by default. `retriever_specific_config={"precise": True}`
+(or `COGNEE_PRECISE_RETRIEVAL=true`; the per-call value wins) makes
+`HYBRID_COMPLETION` add the BM25 lane and rerank a fused pool of 30 with
+MiniLM-L-6, and makes `CHUNKS` fuse vector + BM25 and rerank the same way.
+Code: `cognee/modules/retrieval/precise.py`, wired in the search factory.
+
+Why opt-in: H3's quality gain held on the test split (R@5 +8.6 pt, MRR
++11.3 pt over its pool-30 control) and on LongMemEval-S (MRR +6.3 pt), but
+p95 latency rose 1.91 s against a 0.40 s budget, and Haiku's answer accuracy
+did not change significantly at 20 or 5 passages.
+
+Shipped-path check at `fa9509f20` (tree dirty with docs edits only), haiku
+conv 5: the `hybrid_precise` variant, built from precise mode's constants,
+reproduced all 158 rankings of the benchmarked `hybrid_bm25_rr_minilm`
+(R@5 0.784, MRR 0.721, p50 1.6 s both). File:
+`results/locomo/H3-shipped-check.json`.
+
+```bash
+uv run python -m enhanced.bench.run --name H3-shipped-check --profile haiku \
+  --convs 5 --variants hybrid_bm25_rr_minilm,hybrid_precise
+```

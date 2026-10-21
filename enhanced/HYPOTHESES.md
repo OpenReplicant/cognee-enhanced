@@ -181,7 +181,7 @@ Gaps confirmed in the code (v1.6.5):
   query-passage relevance instead of by lane.
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
-- **Status:** parked: quality accepted, latency over budget on an idle machine (p95 +1.91 s vs +0.40 s). Follow-up H3b.
+- **Status:** quality accepted, latency over budget on an idle machine (p95 +1.91 s vs +0.40 s), so not a default. **Shipped as opt-in precise mode** (BENCHMARKS.md, 2026-10-21). Follow-up H3b rejected.
 - **Claim:** Fusing the chunk lane to a pool of 30, reranking that pool with a
   local cross-encoder, and cutting to 20 raises MRR and recall@5 over the same
   pipeline without the rerank.
