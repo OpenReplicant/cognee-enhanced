@@ -256,3 +256,20 @@ verdict: 900/900 answers, context sizes and verdicts identical across the
 three variants, including the lexical lane after the graph-cache refactor.
 T1 results on the fixed code reproduce exactly, so the `dirty` flag on the
 first run is resolved.
+
+## 2026-10-21 · H6 PPR lane rejected on LoCoMo (haiku) · convs 5-9
+
+Code at `83c19e339` (clean). File: `results/locomo/H6-test-haiku.json`.
+
+| variant | R@5 | all@10 | MRR | multi_hop all@10 | p95 |
+|---|---:|---:|---:|---:|---:|
+| hybrid | 0.666 | 0.714 | 0.577 | 0.314 | 0.32 s |
+| hybrid_ppr | 0.614 | 0.720 | 0.509 | 0.329 | 0.30 s |
+| hybrid_bm25 | 0.744 | 0.782 | 0.652 | 0.364 | 0.32 s |
+| hybrid_bm25_ppr | 0.717 | 0.785 | 0.592 | 0.386 | 0.34 s |
+
+hybrid_bm25_ppr vs hybrid_bm25: multi_hop all@10 +0.021 [−0.021, +0.071];
+recall@5 −0.027 [−0.047, −0.007]; MRR −0.060 [−0.079, −0.040].
+
+**Decision:** rejected on LoCoMo (primary effect n.s., guard violated). The
+likely cause is speaker-entity hubs; H6 stays open for document multi-hop QA.

@@ -258,7 +258,7 @@ Gaps confirmed in the code (v1.6.5):
   questions where variants tie.
 
 ### H6: A Personalized PageRank lane helps multi-hop
-- **Status:** registered
+- **Status:** rejected on LoCoMo (haiku); still open for multi-hop document QA (T0b)
 - **Claim:** A PPR lane fused into hybrid's chunk RRF raises `all@10` on
   multi-hop questions without hurting single-hop. The lane seeds on the
   entities the query matches, runs over the entity–chunk graph, and ranks
@@ -286,6 +286,20 @@ Gaps confirmed in the code (v1.6.5):
 - **Prediction:** multi_hop all@10 +4 pt on the haiku test split; overall
   recall@5 not significantly lower; p95 +≤100 ms. Larger effects expected
   on MuSiQue / 2Wiki (T0b).
+- **Result (haiku, convs 5-9, n=982, `H6-test-haiku.json`):**
+  `hybrid_bm25_ppr` vs `hybrid_bm25`: multi_hop all@10 0.364 → 0.386,
+  +2.1 pt [−2.1, +7.1] (n.s., prediction +4); overall **recall@5 −2.7 pt
+  [−4.7, −0.7]** and MRR −6.0 [−7.9, −4.0], driven by single_hop (−5.0
+  R@5) and adversarial (MRR −9.1). Guard violated, so rejected. Same pattern
+  on plain hybrid (R@5 −5.2, multi_hop all@10 +1.4 n.s.). p95 +22 ms.
+- **Reading:** every LoCoMo graph centres on two speakers, and their entity
+  nodes touch nearly every chunk. A question naming a speaker seeds PPR at a
+  hub, which spreads mass to graph neighbours that displace precise matches
+  near the top. Document multi-hop QA (MuSiQue / 2Wiki) lacks that hub
+  structure and is where HippoRAG's gains were reported, so the T0b test
+  stays open. Untested variants that address the hub: degree-normalised
+  seeds, excluding speaker entities from seeding, PPR as a rerank of the
+  fused top-N rather than a fourth lane.
 
 ### H7: Fact-augmented index keys help multi-hop and temporal
 - **Status:** proposed
