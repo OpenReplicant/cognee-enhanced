@@ -167,7 +167,7 @@ Gaps confirmed in the code (v1.6.5):
   query-passage relevance instead of by lane.
 
 ### H3: Cross-encoder reranking of the fused top-N raises MRR
-- **Status:** quality accepted (haiku, MiniLM); latency verdict pending an idle-machine measurement
+- **Status:** parked: quality accepted, latency over budget on an idle machine (p95 +1.91 s vs +0.40 s). Follow-up H3b.
 - **Claim:** Fusing the chunk lane to a pool of 30, reranking that pool with a
   local cross-encoder, and cutting to 20 raises MRR and recall@5 over the same
   pipeline without the rerank.
@@ -203,6 +203,24 @@ Gaps confirmed in the code (v1.6.5):
   cause was a non-deterministic hybrid context (entity-edge order and the
   edges kept at the cut varied by process), fixed in `5b9cd17c9`. QA
   comparisons are rerun on the fixed code with more questions.
+
+### H3b: A cheaper rerank keeps most of H3's gain within the latency budget
+- **Status:** registered
+- **Idle measurement for H3 (`results/locomo/H3-latency-idle.json`, clean
+  `950c2ce5a`):** control p50 0.21 / p95 0.25 s; MiniLM over 30 full passages
+  p50 1.55 / p95 2.16 s, so +1.91 s p95. Quality reproduced exactly (987/987
+  rankings).
+- **Claim:** reranking only the top 12 fused chunks, each scored on its first
+  800 characters (~200 tokens), stays within +400 ms p95 while keeping most of
+  H3's MRR gain. Cost scales with pool size × passage length, roughly 2.5 × 2 =
+  5× less than H3.
+- **Change:** `rerank_top_n` now reranks the first N fused chunks and leaves the
+  rest in fused order (pool = max(chunks_top_k, N), so H3 is unchanged);
+  `rerank_max_chars` truncates passages for scoring only.
+- **Variant:** `hybrid_bm25_rr12_800` vs `hybrid_bm25` (H1), haiku test split.
+- **Prediction:** MRR ≥ +6 pt over H1 (about 60% of H3's +11.3 over its
+  control), CI above 0; no category regresses significantly; idle p95 ≤
+  +400 ms over H1.
 
 ### H4: Token-budgeted packing beats a fixed top-k
 - **Status:** proposed

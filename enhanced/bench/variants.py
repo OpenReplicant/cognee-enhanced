@@ -166,6 +166,20 @@ VARIANTS = {
         },
         "env": {},
     },
+    # H3b: cheaper rerank, top 12 fused chunks scored on their first 800 chars.
+    "hybrid_bm25_rr12_800": {
+        "retriever": "cognee.modules.retrieval.hybrid_retriever:HybridRetriever",
+        "kwargs": {
+            "chunks_top_k": DEPTH,
+            "entities_top_k": 20,
+            "facts_top_k": 20,
+            "lexical_lane": True,
+            "rerank_top_n": 12,
+            "rerank_model": "Xenova/ms-marco-MiniLM-L-6-v2",
+            "rerank_max_chars": 800,
+        },
+        "env": {},
+    },
     # Single dense lane over chunks.
     "chunks": {
         "retriever": "cognee.modules.retrieval.chunks_retriever:ChunksRetriever",

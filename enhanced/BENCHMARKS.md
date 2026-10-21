@@ -325,3 +325,18 @@ can move at most ~15-20 of 300 answers here. They matter more where the
 evidence cannot all fit in the context (larger stores, BEAM-10M-like scale),
 and reader-side fixes (H14 abstention, an attribution check) target the
 larger error mass.
+
+## 2026-10-21 · H3 parked: rerank latency over budget on an idle machine
+
+Code at `950c2ce5a` (clean), haiku test split, 982 queries, CPU idle except
+the run itself (load ~3.8 = the reranker on 4 cores). File:
+`results/locomo/H3-latency-idle.json`.
+
+| variant | R@5 | MRR | p50 | p95 |
+|---|---:|---:|---:|---:|
+| hybrid_bm25_pool30 (control) | 0.759 | 0.655 | 0.21 s | 0.25 s |
+| hybrid_bm25_rr_minilm | 0.846 | 0.768 | 1.55 s | 2.16 s |
+
+Rerank rankings reproduced the earlier run exactly (987/987). p95 +1.91 s
+against a +0.40 s budget, so parked as registered; H3b tests a 12-chunk,
+800-char rerank.

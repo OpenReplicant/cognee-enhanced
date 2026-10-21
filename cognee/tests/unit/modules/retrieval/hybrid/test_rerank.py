@@ -35,3 +35,20 @@ async def test_rerank_skips_the_model_for_fewer_than_two_chunks(monkeypatch):
 
     monkeypatch.setattr(rerank, "_score", unexpected)
     assert await rerank.rerank_chunks("m", "q", [_chunk("a")]) == [_chunk("a")]
+
+
+@pytest.mark.asyncio
+async def test_rerank_top_n_reorders_only_the_head(monkeypatch):
+    seen = []
+
+    def score(model, query, texts):
+        seen.append(texts)
+        return [0.1, 0.9]
+
+    monkeypatch.setattr(rerank, "_score", score)
+    chunks = [_chunk("a"), _chunk("b"), _chunk("c")]
+
+    ranked = await rerank.rerank_chunks("m", "q", chunks, top_n=2, max_chars=4)
+
+    assert [chunk["id"] for chunk in ranked] == ["b", "a", "c"]
+    assert seen == [["text", "text"]]

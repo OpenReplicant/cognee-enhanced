@@ -91,6 +91,7 @@ class HybridRetriever(BaseRetriever):
         lexical_lane: bool = False,
         rerank_top_n: int | None = None,
         rerank_model: str | None = None,
+        rerank_max_chars: int | None = None,
         chunk_lane_weights: tuple[float, float, float] | None = None,
         ppr_lane: bool = False,
     ):
@@ -119,11 +120,13 @@ class HybridRetriever(BaseRetriever):
         # Opt-in: BM25 rank as a third input to the chunk lane's RRF, beside the
         # dense chunk and summary ranks (enhanced/HYPOTHESES.md H1).
         self.lexical_lane = lexical_lane
-        # Opt-in: fuse the chunk lane to a pool of rerank_top_n, reorder it with
-        # a local cross-encoder (when rerank_model is set), then cut to
-        # chunks_top_k as usual (enhanced/HYPOTHESES.md H3).
+        # Opt-in: fuse the chunk lane to a pool of max(chunks_top_k, rerank_top_n),
+        # reorder its first rerank_top_n with a local cross-encoder (when
+        # rerank_model is set; passages truncated to rerank_max_chars for
+        # scoring), then cut to chunks_top_k (enhanced/HYPOTHESES.md H3, H3b).
         self.rerank_top_n = rerank_top_n
         self.rerank_model = rerank_model
+        self.rerank_max_chars = rerank_max_chars
         # Opt-in: per-lane RRF weights for the chunk lane as (dense chunk, dense
         # summary, lexical); None weighs them equally (enhanced/HYPOTHESES.md H2).
         self.chunk_lane_weights = tuple(chunk_lane_weights) if chunk_lane_weights else None
@@ -215,7 +218,11 @@ class HybridRetriever(BaseRetriever):
         )
         if self.rerank_model:
             chunk_objects["chunks"] = await rerank_chunks(
-                self.rerank_model, query, chunk_objects.get("chunks", [])
+                self.rerank_model,
+                query,
+                chunk_objects.get("chunks", []),
+                top_n=self.rerank_top_n,
+                max_chars=self.rerank_max_chars,
             )
         project_external_metadata(
             chunk_objects.get("chunks", []),
