@@ -25,6 +25,10 @@ the code already does. These are **not** hypotheses here; we build on them.
 | Incremental indexing | `update()`: chunk-level diff and re-extraction |
 | Citations | `include_references` on hybrid |
 | Published memory benchmarks | LoCoMo 0.907 (gpt-5-mini answers, gpt-5.1 judge), BEAM 100K 0.79 and 10M 0.67 (`cognee/eval_framework/`) |
+| Entity deduplication (post-hoc) | `consolidate_entities_pipeline` (`cognee/memify_pipelines/consolidate_entities.py`): merge on name-embedding cosine ≥0.85 or equal normalised name, same type only, most-connected node canonical. Opt-in, run after cognify, no LLM. Guide: docs.cognee.ai/guides/memify-entity-deduplication |
+| Score multipliers on the hybrid chunk RRF | importance weight (on by default), feedback weights (`DEFAULT_FEEDBACK_INFLUENCE`, 0.0), personalization (`PERSONALIZATION_INFLUENCE`), truth-subspace weight (`use_truth_weight`, session-learned centroids, experimental, unvalidated; docs.cognee.ai/guides/truth-subspace-reranking). These reweight by stored signals; none scores query-passage relevance |
+| Multi-hop document QA harness | `cognee/eval_framework/benchmark_adapters`: HotpotQA, MuSiQue, 2Wiki (reuse for T0b before writing our own) |
+| Small retrieval depth (dev, after v1.6.5) | upstream `dev` 80879cf45: LoCoMo 5/5/5 + global context index with adapted ingestion (resolved relative dates, conversation extraction prompt, summaries listing facts and the questions a chunk answers) scores 89.7% vs 91.3% at 20/20/20, one run each, opt-in eval options only |
 
 Where upstream's own results are weakest: BEAM at 10M scale (0.67; the
 report says no single retrieval setting suited every question type), BEAM
@@ -36,8 +40,10 @@ reranker, PPR, entity resolution, token budgeting and learned routing.
 Gaps confirmed in the code (v1.6.5):
 - `hybrid/ranking.py` fuses only dense-chunk and dense-summary ranks. BM25
   exists (`CHUNKS_LEXICAL`) but never feeds hybrid.
-- Entity names are only normalised (`generate_node_name`: lower-case, strip
-  `'`). There is no alias or embedding-based merge.
+- At write time entity names are only normalised (`generate_node_name`:
+  lower-case, strip `'`). The embedding-based merge exists only as the opt-in
+  post-hoc `consolidate_entities_pipeline` (table above), which nothing runs
+  by default and which has no published precision figure.
 - No cross-encoder reranking anywhere; "rerank" in the code means the temporal
   stable partition.
 - PageRank is used only for the hub list in `GRAPH_REPORT`, not for retrieval.
@@ -297,6 +303,11 @@ Gaps confirmed in the code (v1.6.5):
   retrieval, looks like the binding limit on LoCoMo with Haiku (adversarial
   0.30-0.44, temporal 0.61-0.66). Next: per-question error attribution
   (was the gold window in the context?).
+- **Upstream overlap:** upstream `dev` (80879cf45) measured the same
+  question with gpt-5-mini: 5/5/5 plus the global context index and adapted
+  ingestion scores 89.7% vs 91.3% at 20/20/20. They shrink all three lanes
+  and change ingestion; H4a shrinks passages only and changes ranking. Any
+  further small-context work compares against their 5/5/5 config.
 
 ### H5: A learned query router beats fixed hybrid
 - **Status:** proposed (needs ≥3 accepted or measured variants first)
@@ -366,6 +377,12 @@ Gaps confirmed in the code (v1.6.5):
 - **Metric:** recall@5 by category.
 - **Prediction:** +3 pt multi_hop, +2 pt temporal. Needs re-ingestion (a new
   store); keyless facts are weak, so a T1 run decides.
+- **Upstream overlap:** upstream `dev` (80879cf45) already puts facts and
+  "questions this chunk answers" into the chunk summary through an eval-only
+  prompt (`eval_framework/locomo/prompts/summarize_content_questions.txt`),
+  so they reach the existing dense summary lane. H7 must use that prompt as
+  its baseline and test only what it lacks (separate fact keys, the BM25
+  lane over facts, the session date as a key).
 
 ### H8: A recency prior helps knowledge-update questions (T0b)
 - **Status:** proposed (needs LongMemEval-S in the harness)
@@ -411,9 +428,16 @@ Gaps confirmed in the code (v1.6.5):
 - **Claim:** An entity-resolution stage (string and embedding blocking, then
   a merge decision, then canonical-ID rewrite) cuts duplicate entity nodes
   substantially without false merges.
+- **Upstream baseline:** upstream already ships the rule-only version of this
+  as the opt-in `consolidate_entities_pipeline` (cosine ≥0.85 on name
+  embeddings, same type). The first step is to score **that pipeline** on
+  `pairs-haiku.jsonl` (with `dry_run=True` for the merge plan), not to build a
+  second one. Our work starts only where it falls short: an LLM adjudicator
+  for the uncertain band, relation-name normalisation, or running it inside
+  cognify instead of after it.
 - **Why:** Duplicate entities are the dominant LLM-KG construction error
-  (the GraphRAG and LightRAG ablations both show it). Cognee normalises case
-  only.
+  (the GraphRAG and LightRAG ablations both show it). Cognee's write path
+  normalises case only.
 - **Metric:** pairwise merge precision and recall on a labelled alias set
   (LoCoMo speaker and entity aliases plus synthetic variants); downstream:
   hybrid entity-lane recall (T0) and H6 multi-hop.

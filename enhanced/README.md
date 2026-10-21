@@ -83,6 +83,12 @@ default, behind a switch, instead of being dropped.
   `top_k`). Haiku's answer accuracy did not change significantly at 20 or
   5 passages (+2 and +3 pt, both n.s.).
 
+  Known interaction: upstream's chunk-score multipliers (importance weight,
+  feedback, personalization, truth-subspace weight) act on the fused score,
+  and the cross-encoder then reorders the top 30 by query relevance alone.
+  Inside that pool their effect is lost; they still decide which chunks
+  reach the pool. Combining the two needs its own hypothesis and benchmark.
+
 ### Acceptance rule
 
 - The primary metric's paired-bootstrap 95% CI lower bound is above 0 on the
