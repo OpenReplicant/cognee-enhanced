@@ -358,3 +358,17 @@ Session-level gold. Code at `f7d7cb702` (clean). File:
 
 H1: R@5 +0.021 [−0.021, +0.071], not replicated. H3: MRR +0.063 [+0.024,
 +0.108], R@5 +0.049 [+0.013, +0.094], replicated.
+
+## 2026-10-21 · H3b rejected: truncated rerank loses evidence
+
+Haiku test split, idle CPU, code at `048be8789` (clean). File:
+`results/locomo/H3b-test-haiku.json`.
+
+| variant | R@5 | R@10 | MRR | p50 / p95 |
+|---|---:|---:|---:|---:|
+| hybrid_bm25 (H1) | 0.744 | 0.830 | 0.652 | 0.17 / 0.21 s |
+| hybrid_bm25_rr12_800 | 0.712 | 0.779 | 0.677 | 0.36 / 0.46 s |
+
+MRR +0.025 [+0.003, +0.048]; R@5 −0.032 [−0.055, −0.008]; R@10 −0.050
+[−0.067, −0.034]. Latency within budget; quality regresses, so rejected.
+Prefix truncation drops the evidence turn in long windows.

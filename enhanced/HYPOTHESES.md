@@ -205,7 +205,7 @@ Gaps confirmed in the code (v1.6.5):
   comparisons are rerun on the fixed code with more questions.
 
 ### H3b: A cheaper rerank keeps most of H3's gain within the latency budget
-- **Status:** registered
+- **Status:** rejected: latency met, quality regresses
 - **Idle measurement for H3 (`results/locomo/H3-latency-idle.json`, clean
   `950c2ce5a`):** control p50 0.21 / p95 0.25 s; MiniLM over 30 full passages
   p50 1.55 / p95 2.16 s, so +1.91 s p95. Quality reproduced exactly (987/987
@@ -221,6 +221,17 @@ Gaps confirmed in the code (v1.6.5):
 - **Prediction:** MRR ≥ +6 pt over H1 (about 60% of H3's +11.3 over its
   control), CI above 0; no category regresses significantly; idle p95 ≤
   +400 ms over H1.
+- **Result (`results/locomo/H3b-test-haiku.json`, clean `048be8789`,
+  idle CPU, n=982):** MRR 0.652 → 0.677, +2.5 pt [+0.3, +4.8] (prediction
+  +6, not met); **R@5 −3.2 [−5.5, −0.8] and R@10 −5.0 [−6.7, −3.4]**,
+  significant regressions led by adversarial (R@5 −8.4) and single_hop (−4.3);
+  p95 0.21 → 0.46 s (+0.25 s, within budget). Rejected.
+- **Reading:** LoCoMo windows open with a ~150-char session header and run
+  1,500-2,000 chars, so an 800-char prefix often cuts off the turn holding the
+  evidence. The reranker then confidently demotes the right passages. A cheap
+  rerank has to score short *spans* (e.g. each turn, take the max), not a
+  prefix. On LongMemEval the full rerank replicated (T0b-1), so the quality
+  case stands and the open problem is cost.
 
 ### H4: Token-budgeted packing beats a fixed top-k
 - **Status:** proposed
