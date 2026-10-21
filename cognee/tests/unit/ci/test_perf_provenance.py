@@ -13,6 +13,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[4]
 WORKFLOWS = ROOT / ".github/workflows"
+# cognee-enhanced parks upstream's workflows here (enhanced/README.md, "CI").
+if not (WORKFLOWS / "performance_report.yml").exists():
+    WORKFLOWS = ROOT / ".github/upstream-parked/workflows"
 CASES = []
 for filename in (
     "performance_report.yml",

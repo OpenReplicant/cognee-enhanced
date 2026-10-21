@@ -53,10 +53,18 @@ note in their ledger entry, not a PR.
 
 `.github/workflows/enhanced_ci.yml` runs ruff and the unit tests for
 `enhanced/` and the retrieval modules on pushes to `main` and `claude/**`
-and on pull requests to `main`. Upstream's workflows stay in the tree, since
-deleting them would conflict on every upstream merge. Disable the ones that
-fire on `main` (Docker Hub, release, canary, scorecard, test suites) in the
-repository's Actions settings instead.
+and on pull requests to `main`. It is the only active workflow.
+
+Upstream's 64 workflows and `dependabot.yml` are **parked** in
+`.github/upstream-parked/`, because GitHub only runs files in
+`.github/workflows/`. Left active, their scheduled jobs (CVE alert,
+stale-PR cleanup, docs-PR drafting, nightly Docker validation, telemetry)
+ran on this repo's default branch without upstream's secrets. To merge
+upstream, run `enhanced/scripts/sync_upstream.sh`: it merges `upstream/main`,
+lets git's rename detection carry upstream's edits into the parked copies,
+parks any workflow upstream adds, and stops if real conflicts remain. Fork
+workflows must be named `enhanced_*.yml`. If the repository's Actions settings
+become reachable, disabling the upstream workflows there is an alternative.
 
 ### Acceptance rule
 
