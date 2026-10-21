@@ -372,3 +372,23 @@ Haiku test split, idle CPU, code at `048be8789` (clean). File:
 MRR +0.025 [+0.003, +0.048]; R@5 −0.032 [−0.055, −0.008]; R@10 −0.050
 [−0.067, −0.034]. Latency within budget; quality regresses, so rejected.
 Prefix truncation drops the evidence turn in long windows.
+
+## 2026-10-21 · H1b accepted, H1 accepted on keyless · convs 5-9
+
+Keyless profile (GLiNER graph, bge-small). Code at `2cb780466` (clean). File:
+`results/locomo/H1-test-keyless.json`.
+
+| variant | R@5 | R@10 | MRR | p95 |
+|---|---:|---:|---:|---:|
+| hybrid (upstream) | 0.573 | 0.666 | 0.483 | 0.18 s |
+| hybrid_bm25 (H1) | 0.648 | 0.779 | 0.576 | 0.20 s |
+| hybrid_nosum | 0.620 | 0.708 | 0.524 | 0.12 s |
+| **hybrid_bm25_nosum (H1b)** | **0.735** | **0.816** | **0.640** | 0.15 s |
+| chunks (upstream keyless recall) | 0.620 | 0.708 | 0.524 | 0.06 s |
+| bm25 | 0.783 | 0.834 | 0.717 | 0.03 s |
+
+H1b vs chunks: R@5 +0.116 [+0.092, +0.140], MRR +0.116 [+0.097, +0.135].
+H1 vs hybrid: R@5 +0.076 [+0.057, +0.096]. No category regresses in either.
+
+**Decision:** H1b accepted. Keyless `recall()` (upstream: dense `CHUNKS`)
+is the place to use it; flip proposed as this fork's default.

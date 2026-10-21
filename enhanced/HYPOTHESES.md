@@ -51,7 +51,7 @@ Gaps confirmed in the code (v1.6.5):
 ## Tier T0: retrieval, LLM-free (start here)
 
 ### H1: A lexical lane in hybrid RRF raises chunk recall
-- **Status:** accepted (haiku profile, retrieval). Default flip waits on a cached BM25 index (the lane rescans all chunks per query) and the keyless test split.
+- **Status:** accepted on retrieval (haiku and keyless); not replicated on LongMemEval (+2.1 n.s.); answer accuracy unchanged at k=20. BM25 index now cached.
 - **Claim:** Adding the BM25 rank as a third input to the hybrid chunk lane's
   RRF (beside the dense-chunk and dense-summary ranks) raises recall@5.
 - **Why:** Conversational memory questions name people, objects and places
@@ -84,12 +84,15 @@ Gaps confirmed in the code (v1.6.5):
   answerer picks one. Recall at depth 20 rose and precision of the context
   fell. Hence the default stays off until a precision fix (H3 rerank, H4
   budget) is tested on answers. File: `results/locomo-qa/H1-qa-haiku.json`.
+- **Result (keyless, convs 5-9, `H1-test-keyless.json`):** R@5 0.573 →
+  0.648, +7.6 pt [+5.7, +9.6]; MRR +9.4 [+7.8, +10.9]; no category regresses
+  (temporal R@5 +3.5 n.s.).
 - **Caveat (found later):** this QA ran on a non-deterministic hybrid
   context (see H3, fixed in `5b9cd17c9`); a rerun of the same configs gave
   hybrid 0.700 / hybrid_bm25 0.747. Treat both QA runs as noisy draws.
 
 ### H1b: Keyless retrieval should fuse BM25 with dense chunks
-- **Status:** registered
+- **Status:** accepted (keyless, convs 5-9)
 - **Claim:** For keyless installs (where `recall()` already falls back to
   `CHUNKS`), dense-chunk + BM25 RRF beats dense chunks alone.
 - **Why:** The conv 0 exploration above. This needs no LLM, so it ships to
@@ -99,6 +102,13 @@ Gaps confirmed in the code (v1.6.5):
 - **Prediction:** +3 pt recall@5, +5 pt MRR; no category regresses
   significantly. (Conv 0 showed +6.1 R@5, +10.0 MRR; the prediction is set
   lower on purpose because that was the conversation we looked at.)
+- **Result (`results/locomo/H1-test-keyless.json`, clean `2cb780466`,
+  n=982):** chunks 0.620 → hybrid_bm25_nosum 0.735 R@5, **+11.6 pt [+9.2,
+  +14.0]**; MRR **+11.6 [+9.7, +13.5]**; adversarial +16.8, temporal +12.3,
+  single_hop +12.9, multi_hop +1.9 (n.s.), open_domain +3.0 (n.s.). No
+  regression; p95 0.06 → 0.15 s. Accepted. These chunk-lane numbers are
+  identical on the haiku stores (same chunks and embeddings). On LongMemEval
+  (T0b-1) fusion also beat dense and BM25 alone.
 
 ### H2: Lane weights tuned per corpus beat equal-weight RRF
 - **Status:** rejected (haiku): overall gain met, but multi_hop regressed significantly. Follow-up H2b.
@@ -120,6 +130,10 @@ Gaps confirmed in the code (v1.6.5):
   retriever (`HybridRetriever(lexical_lane=True, chunk_lane_weights=...)`) on
   the test split against `hybrid_bm25`, once per profile.
 - **Metric:** recall@5 on test split (conversations 5-9).
+- **Keyless half (`H1-test-keyless.json`):** dense + BM25 without the
+  summary lane beats default hybrid by +16.3 pt R@5 [+13.5, +19.0]; dropping
+  only the summary lane gives +4.7 (0.573 → 0.620). GLiNER summaries hurt,
+  as predicted (the tuning step itself was not run for keyless).
 - **Prediction (haiku):** +1 pt recall@5 over H1's equal weights, with the
   lexical weight above both dense weights (from the BM25-alone result).
 - **Prediction (keyless):** summary-lane weight tuned on convs 0-4 ends below
