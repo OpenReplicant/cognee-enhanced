@@ -54,6 +54,14 @@ PROFILES = {
         "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
         "EMBEDDING_DIMENSIONS": "384",
     },
+    # Chunks only (LongMemEval): the store is built without graph extraction,
+    # so only the local embeddings matter; same settings as keyless.
+    "chunks": {
+        "GRAPH_EXTRACTOR": "gliner_demo",
+        "EMBEDDING_PROVIDER": "fastembed",
+        "EMBEDDING_MODEL": "BAAI/bge-small-en-v1.5",
+        "EMBEDDING_DIMENSIONS": "384",
+    },
     # LLM-built graph and summaries from Claude Haiku through the local
     # Claude Code proxy (`python -m enhanced.llm_proxy --model haiku`, port
     # 8765); same local embeddings as keyless, so the two profiles differ

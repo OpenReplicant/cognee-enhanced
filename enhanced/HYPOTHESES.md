@@ -336,6 +336,22 @@ Gaps confirmed in the code (v1.6.5):
 - **Metric:** LongMemEval-S knowledge-update session recall@5.
 - **Prediction:** +5 pt KU; no other category changes by more than 1 pt.
 
+### T0b-1: H1 and H3 replicate on LongMemEval-S (fresh data)
+- **Status:** registered
+- **Setup:** `bench/lme_run.py`, 70 questions (10 per type incl.
+  abstention, seed 0), one chunks-only store per question (~247 dated rounds,
+  ~120k tokens; no LLM, so hybrid's entity/summary lanes are empty and
+  `hybrid` = dense chunks). Gold = `answer_session_ids`; metrics at session
+  level.
+- **Variants:** `hybrid`, `hybrid_bm25`, `bm25`, `hybrid_bm25_pool30`,
+  `hybrid_bm25_rr_minilm`.
+- **Prediction:** (1) H1: hybrid_bm25 − hybrid session recall@5 ≥ +3 pt,
+  CI above 0. (2) H3: rr_minilm − pool30 MRR ≥ +5 pt, CI above 0. (3)
+  multi-session and knowledge-update gain least from BM25, because their
+  evidence sits in several sessions or changes over time.
+- **Why it matters:** these are the first numbers on data none of the
+  choices were tuned on, with a haystack about 4× LoCoMo's.
+
 ## Tier M: component micro-benchmarks
 
 ### H9: Entity resolution removes alias duplicates at high precision

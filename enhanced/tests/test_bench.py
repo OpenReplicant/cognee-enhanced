@@ -85,3 +85,48 @@ def test_store_lock_serialises_holders(tmp_path):
     first.join()
     second.join()
     assert events == ["a+", "a-", "b+", "b-"]
+
+
+def test_longmemeval_rounds_pair_user_turns_with_replies_and_dates():
+    from enhanced.bench.longmemeval_worker import category, rounds
+
+    question = {
+        "question_id": "q1_abs",
+        "question_type": "multi-session",
+        "haystack_session_ids": ["s1", "s2"],
+        "haystack_dates": ["2023/05/20 (Sat) 02:21", "2023/05/21 (Sun) 10:00"],
+        "haystack_sessions": [
+            [
+                {"role": "user", "content": "hi"},
+                {"role": "assistant", "content": "hello"},
+                {"role": "user", "content": "bye"},
+            ],
+            [{"role": "assistant", "content": "orphan"}, {"role": "user", "content": "again"}],
+        ],
+    }
+
+    out = rounds(question)
+
+    assert [r["session_id"] for r in out] == ["s1", "s1", "s2"]
+    assert (
+        out[0]["text"]
+        == "Chat session s1, 2023/05/20 (Sat) 02:21, round 1.\nUser: hi\nAssistant: hello"
+    )
+    assert out[1]["text"].endswith("User: bye\nAssistant: ")
+    assert category(question) == "abstention"
+
+
+def test_longmemeval_sample_is_stratified_and_stable(monkeypatch):
+    from enhanced.bench import lme_run
+
+    questions = {
+        f"{kind}{i}": {"question_id": f"{kind}{i}", "question_type": kind}
+        for kind in ("a", "b")
+        for i in range(5)
+    }
+    monkeypatch.setattr(lme_run, "load_questions", lambda: questions)
+
+    first = lme_run.sample(2, seed=0)
+
+    assert first == lme_run.sample(2, seed=0)
+    assert sum(q.startswith("a") for q in first) == 2 and len(first) == 4
