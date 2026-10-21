@@ -37,6 +37,18 @@ that defaults to upstream behaviour until the hypothesis is accepted.
    default in a separate commit that cites the result. Rejected: keep the
    negative result and remove or park the code.
 
+### Upstream policy
+
+No pull requests to `topoteretes/cognee` unless we are confident they would be
+accepted. This may well become a long-lived fork. Even so, stay mergeable:
+small focused commits, changes behind switches that default to upstream
+behaviour, and new code in new modules where possible, so each upstream
+release can be merged in with few conflicts. A change that passes the
+acceptance rule below can become this fork's default without waiting on
+upstream; record the flip in `BENCHMARKS.md`. Changes that look upstreamable
+(self-contained bug fixes such as the deterministic hybrid context) get a
+note in their ledger entry, not a PR.
+
 ### Acceptance rule
 
 - The primary metric's paired-bootstrap 95% CI lower bound is above 0 on the
