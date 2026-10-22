@@ -160,15 +160,26 @@ async def _child(args) -> dict:
     await cognee.prune.prune_data()
     await cognee.prune.prune_system(metadata=True)
 
+    # Warm-up in its own dataset and session: the first remember() of a process
+    # pays migrations, model loads and the first-run LLM connection test, which
+    # a running chat app has already paid. The probe's clock starts after it.
+    warmup = await cognee.remember("Warm-up turn.", dataset_name="warmup", session_id="warmup")
+    if getattr(warmup, "_task", None) is not None:
+        await warmup._task
+    EVENTS.clear()
+    start = _now()
+
     turns = _turns(args.conversation, args.turns)
     sent, returned = [], []
     tasks = []
+    dataset_id = None
     for index, text in enumerate(turns):
-        due = index * args.pace
+        due = start + index * args.pace
         await asyncio.sleep(max(0.0, due - _now()))
         sent.append(_now())
         result = await cognee.remember(text, dataset_name="probe", session_id="probe-session")
         returned.append(_now())
+        dataset_id = dataset_id or result.dataset_id
         if getattr(result, "_task", None) is not None:
             tasks.append(result._task)
 
@@ -178,9 +189,15 @@ async def _child(args) -> dict:
     await asyncio.gather(*tasks, return_exceptions=True)
     await cognee.wait_for_background_tasks()
 
-    from cognee.infrastructure.databases.graph import get_graph_engine
+    from uuid import UUID
 
-    nodes, edges = await (await get_graph_engine()).get_graph_data()
+    from cognee.context_global_variables import set_database_global_context_variables
+    from cognee.infrastructure.databases.graph import get_graph_engine
+    from cognee.modules.users.methods import get_default_user
+
+    user = await get_default_user()
+    async with set_database_global_context_variables(UUID(str(dataset_id)), user.id):
+        nodes, edges = await (await get_graph_engine()).get_graph_data()
     node_types: dict[str, int] = {}
     for _, props in nodes:
         node_types[props.get("type", "?")] = node_types.get(props.get("type", "?"), 0) + 1
@@ -194,7 +211,7 @@ async def _child(args) -> dict:
 
     return {
         "turns": turns,
-        "sent": sent,
+        "sent": [round(t - start, 3) for t in sent],
         "remember_returned_s": [round(r - s, 3) for s, r in zip(sent, returned)],
         "turn_to_graph_s": visible,
         "graph": {"nodes": len(nodes), "edges": len(edges), "node_types": node_types},
