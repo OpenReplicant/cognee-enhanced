@@ -75,12 +75,11 @@ def _instrument() -> None:
     litellm.acompletion = _timed("llm", _llm_label, litellm.acompletion)
 
     import cognee
-    import cognee.api.v1.improve as improve_package
+    import cognee.tasks.memify.cognify_session
     from cognee.infrastructure.databases.vector.embeddings.FastembedEmbeddingEngine import (
         FastembedEmbeddingEngine,
     )
     from cognee.modules.improve.registry import DEFAULT_STAGES
-    from cognee.tasks.memify import cognify_session
 
     FastembedEmbeddingEngine.embed_text = _timed(
         "embed",
@@ -114,6 +113,8 @@ def _instrument() -> None:
 
         stage.run = make(stage, stage.run)
 
+    # By sys.modules: the package attribute chain resolves to the function.
+    improve_package = sys.modules["cognee.api.v1.improve"]
     improve_fn = improve_package.improve
 
     async def improve_timed(*args, **kwargs):
@@ -134,6 +135,7 @@ def _instrument() -> None:
 
     improve_package.improve = improve_timed
 
+    cognify_session = sys.modules["cognee.tasks.memify.cognify_session"]
     save = cognify_session.save_persisted_qa_count
 
     async def save_timed(session_manager, user_id, session_id, persisted_qa_count):
