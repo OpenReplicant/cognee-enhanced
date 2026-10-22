@@ -1,0 +1,1917 @@
+{
+ "turns": [
+  "Caroline: Hey Mel! Good to see you! How have you been?",
+  "Melanie: Hey Caroline! Good to see you! I'm swamped with the kids & work. What's up with you? Anything new?",
+  "Caroline: I went to a LGBTQ support group yesterday and it was so powerful.",
+  "Melanie: Wow, that's cool, Caroline! What happened that was so awesome? Did you hear any inspiring stories?",
+  "Caroline: The transgender stories were so inspiring! I was so happy and thankful for all the support.",
+  "Melanie: Wow, love that painting! So cool you found such a helpful group. What's it done for you?",
+  "Caroline: The support group has made me feel accepted and given me courage to embrace myself.",
+  "Melanie: That's really cool. You've got guts. What now?",
+  "Caroline: Gonna continue my edu and check out career options, which is pretty exciting!",
+  "Melanie: Wow, Caroline! What kinda jobs are you thinkin' of? Anything that stands out?"
+ ],
+ "sent": [
+  0.033,
+  15.01,
+  30.004,
+  45.005,
+  60.004,
+  75.003,
+  90.003,
+  105.002,
+  120.003,
+  135.004
+ ],
+ "remember_returned_s": [
+  0.141,
+  0.144,
+  0.121,
+  0.136,
+  0.145,
+  0.14,
+  0.14,
+  0.162,
+  0.128,
+  0.148
+ ],
+ "turn_to_graph_s": [
+  3.15,
+  1.5,
+  6.72,
+  6.91,
+  9.27,
+  9.22,
+  8.98,
+  7.4,
+  7.13,
+  6.94
+ ],
+ "graph": {
+  "nodes": 46,
+  "edges": 104,
+  "node_types": {
+   "TextSummary": 10,
+   "NodeSet": 1,
+   "DocumentChunk": 10,
+   "TextDocument": 10,
+   "Entity": 9,
+   "EntityType": 5,
+   "Timestamp": 1
+  }
+ },
+ "events": [
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 17.954,
+   "t1": 17.972
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 18.302,
+   "t1": 18.431,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 18.534,
+   "t1": 18.667
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 18.846,
+   "t1": 18.855
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 18.849,
+   "t1": 18.857
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 20.572,
+   "t1": 20.589
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 20.59,
+   "t1": 20.601
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 20.601,
+   "t1": 20.609
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 20.61,
+   "t1": 20.619
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 20.654,
+   "t1": 20.665
+  },
+  {
+   "kind": "embed",
+   "label": "12 texts",
+   "stage": "persist_session_qa",
+   "t0": 20.771,
+   "t1": 20.859
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 18.667,
+   "t1": 21.016
+  },
+  {
+   "kind": "persisted",
+   "count": 1,
+   "t1": 21.024
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 18.431,
+   "t1": 21.041,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 21.041,
+   "t1": 21.043,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 21.044,
+   "t1": 21.047,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 21.047,
+   "t1": 21.068,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 18.001,
+   "t1": 21.074,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 32.912,
+   "t1": 32.938
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 33.037,
+   "t1": 33.194,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 33.346,
+   "t1": 33.504
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 33.616,
+   "t1": 33.628
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 33.619,
+   "t1": 33.631
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 33.687,
+   "t1": 33.702
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 33.702,
+   "t1": 33.717
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 33.717,
+   "t1": 33.729
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 33.729,
+   "t1": 33.736
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 33.766,
+   "t1": 33.771
+  },
+  {
+   "kind": "embed",
+   "label": "13 texts",
+   "stage": "persist_session_qa",
+   "t0": 34.039,
+   "t1": 34.142
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 33.504,
+   "t1": 34.345
+  },
+  {
+   "kind": "persisted",
+   "count": 2,
+   "t1": 34.351
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 33.194,
+   "t1": 34.373,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 34.373,
+   "t1": 34.375,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 34.377,
+   "t1": 34.381,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 34.381,
+   "t1": 34.405,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 32.979,
+   "t1": 34.413,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 47.892,
+   "t1": 47.907
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 47.997,
+   "t1": 48.146,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 48.266,
+   "t1": 48.424
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 48.582,
+   "t1": 53.359
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 48.575,
+   "t1": 53.844
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 53.909,
+   "t1": 53.928
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 53.929,
+   "t1": 53.939
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 53.939,
+   "t1": 53.95
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 53.95,
+   "t1": 53.963
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 53.99,
+   "t1": 53.995
+  },
+  {
+   "kind": "embed",
+   "label": "14 texts",
+   "stage": "persist_session_qa",
+   "t0": 54.253,
+   "t1": 54.372
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 48.424,
+   "t1": 54.551
+  },
+  {
+   "kind": "persisted",
+   "count": 3,
+   "t1": 54.558
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 48.146,
+   "t1": 54.575,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 54.575,
+   "t1": 54.577,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 54.578,
+   "t1": 54.581,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 54.581,
+   "t1": 54.6,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 47.947,
+   "t1": 54.608,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 62.905,
+   "t1": 62.915
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 63.028,
+   "t1": 63.175,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 63.331,
+   "t1": 63.486
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 63.643,
+   "t1": 69.005
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 63.646,
+   "t1": 69.178
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 69.228,
+   "t1": 69.258
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 69.259,
+   "t1": 69.271
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 69.271,
+   "t1": 69.28
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 69.28,
+   "t1": 69.293
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 69.312,
+   "t1": 69.318
+  },
+  {
+   "kind": "embed",
+   "label": "13 texts",
+   "stage": "persist_session_qa",
+   "t0": 69.435,
+   "t1": 69.553
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 63.486,
+   "t1": 69.742
+  },
+  {
+   "kind": "persisted",
+   "count": 4,
+   "t1": 69.748
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 63.175,
+   "t1": 69.766,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 69.766,
+   "t1": 69.768,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 69.769,
+   "t1": 69.773,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 69.773,
+   "t1": 69.792,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 62.965,
+   "t1": 69.799,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 77.909,
+   "t1": 77.932
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 78.029,
+   "t1": 78.165,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 78.282,
+   "t1": 78.418
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 78.577,
+   "t1": 83.498
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 78.574,
+   "t1": 86.336
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 86.395,
+   "t1": 86.414
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 86.415,
+   "t1": 86.424
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 86.424,
+   "t1": 86.435
+  },
+  {
+   "kind": "embed",
+   "label": "3 texts",
+   "stage": "persist_session_qa",
+   "t0": 86.435,
+   "t1": 86.448
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 86.496,
+   "t1": 86.502
+  },
+  {
+   "kind": "embed",
+   "label": "17 texts",
+   "stage": "persist_session_qa",
+   "t0": 86.814,
+   "t1": 86.922
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 78.419,
+   "t1": 87.102
+  },
+  {
+   "kind": "persisted",
+   "count": 5,
+   "t1": 87.107
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 78.165,
+   "t1": 87.123,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 87.123,
+   "t1": 87.125,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 87.126,
+   "t1": 87.129,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 87.129,
+   "t1": 87.149,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 77.978,
+   "t1": 87.156,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 92.906,
+   "t1": 92.922
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 93.026,
+   "t1": 93.171,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 93.303,
+   "t1": 93.483
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 93.659,
+   "t1": 100.971
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 93.655,
+   "t1": 101.453
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 101.506,
+   "t1": 101.529
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 101.53,
+   "t1": 101.542
+  },
+  {
+   "kind": "embed",
+   "label": "3 texts",
+   "stage": "persist_session_qa",
+   "t0": 101.542,
+   "t1": 101.55
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 101.55,
+   "t1": 101.559
+  },
+  {
+   "kind": "embed",
+   "label": "3 texts",
+   "stage": "persist_session_qa",
+   "t0": 101.6,
+   "t1": 101.608
+  },
+  {
+   "kind": "embed",
+   "label": "16 texts",
+   "stage": "persist_session_qa",
+   "t0": 101.74,
+   "t1": 101.862
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 93.483,
+   "t1": 102.055
+  },
+  {
+   "kind": "persisted",
+   "count": 6,
+   "t1": 102.061
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 93.171,
+   "t1": 102.085,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 102.085,
+   "t1": 102.088,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 102.089,
+   "t1": 102.092,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 102.092,
+   "t1": 102.115,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 92.97,
+   "t1": 102.125,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 107.902,
+   "t1": 107.924
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 108.029,
+   "t1": 108.184,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 108.318,
+   "t1": 108.489
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 108.696,
+   "t1": 113.5
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 108.692,
+   "t1": 116.046
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 116.104,
+   "t1": 116.126
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 116.126,
+   "t1": 116.136
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 116.136,
+   "t1": 116.147
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 116.148,
+   "t1": 116.153
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 116.188,
+   "t1": 116.194
+  },
+  {
+   "kind": "embed",
+   "label": "13 texts",
+   "stage": "persist_session_qa",
+   "t0": 116.484,
+   "t1": 116.615
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 108.489,
+   "t1": 116.82
+  },
+  {
+   "kind": "persisted",
+   "count": 7,
+   "t1": 116.826
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 108.184,
+   "t1": 116.844,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 116.844,
+   "t1": 116.846,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 116.848,
+   "t1": 116.852,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 116.852,
+   "t1": 116.877,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 107.968,
+   "t1": 116.885,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 122.91,
+   "t1": 122.943
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 123.057,
+   "t1": 123.203,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 123.342,
+   "t1": 123.489
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 123.718,
+   "t1": 128.904
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 123.714,
+   "t1": 129.665
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 129.713,
+   "t1": 129.733
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 129.733,
+   "t1": 129.745
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 129.745,
+   "t1": 129.752
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 129.752,
+   "t1": 129.76
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 129.789,
+   "t1": 129.794
+  },
+  {
+   "kind": "embed",
+   "label": "8 texts",
+   "stage": "persist_session_qa",
+   "t0": 129.957,
+   "t1": 130.028
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 123.489,
+   "t1": 130.236
+  },
+  {
+   "kind": "persisted",
+   "count": 8,
+   "t1": 130.243
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 123.203,
+   "t1": 130.264,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 130.264,
+   "t1": 130.266,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 130.267,
+   "t1": 130.271,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 130.271,
+   "t1": 130.293,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 122.987,
+   "t1": 130.301,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 137.89,
+   "t1": 137.909
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 138.007,
+   "t1": 138.142,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 138.259,
+   "t1": 138.427
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 138.642,
+   "t1": 143.773
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 138.645,
+   "t1": 144.229
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 144.285,
+   "t1": 144.302
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 144.302,
+   "t1": 144.312
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 144.312,
+   "t1": 144.325
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 144.325,
+   "t1": 144.329
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 144.355,
+   "t1": 144.359
+  },
+  {
+   "kind": "embed",
+   "label": "8 texts",
+   "stage": "persist_session_qa",
+   "t0": 144.529,
+   "t1": 144.597
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 138.427,
+   "t1": 144.961
+  },
+  {
+   "kind": "persisted",
+   "count": 9,
+   "t1": 144.967
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 138.142,
+   "t1": 144.989,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 144.989,
+   "t1": 144.991,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 144.992,
+   "t1": 144.995,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 144.995,
+   "t1": 145.016,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 137.957,
+   "t1": 145.023,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 152.906,
+   "t1": 152.919
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 153.036,
+   "t1": 153.198,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 153.353,
+   "t1": 153.542
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 153.799,
+   "t1": 159.114
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 153.795,
+   "t1": 159.164
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 159.221,
+   "t1": 159.243
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 159.243,
+   "t1": 159.253
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 159.253,
+   "t1": 159.263
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 159.263,
+   "t1": 159.268
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 159.301,
+   "t1": 159.305
+  },
+  {
+   "kind": "embed",
+   "label": "12 texts",
+   "stage": "persist_session_qa",
+   "t0": 159.431,
+   "t1": 159.514
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 153.542,
+   "t1": 159.774
+  },
+  {
+   "kind": "persisted",
+   "count": 10,
+   "t1": 159.781
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 153.198,
+   "t1": 159.799,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 159.799,
+   "t1": 159.801,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 159.802,
+   "t1": 159.805,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 159.805,
+   "t1": 159.827,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 152.97,
+   "t1": 159.835,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  }
+ ],
+ "config": {
+  "AUTO_FEEDBACK": "true",
+  "CACHING": "true",
+  "ENABLE_BACKEND_ACCESS_CONTROL": "true",
+  "IMPROVE_AUTO_ENABLED": "true",
+  "pace_s": 15.0,
+  "overrides": []
+ },
+ "git": {
+  "sha": "8a5079b77da63f71f65e335c796fceff08266225",
+  "dirty": false
+ }
+}

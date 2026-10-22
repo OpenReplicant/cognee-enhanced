@@ -529,6 +529,25 @@ These run through the Claude Code proxy (`enhanced/llm_proxy.py`).
 - **Metric:** LoCoMo adversarial and LongMemEval abstention accuracy;
   answerable accuracy as a guard.
 
+## Real-time memory: turn to graph
+
+How fast a chat turn written with `remember(..., session_id=...)` becomes
+visible in the graph. Upstream already bridges every turn by default (a
+background `improve()` whose `persist_session_qa` stage runs `add()` +
+`cognify()` on the new turns); the work here is making that path faster, not
+adding it.
+
+### R0: baseline measurement
+- **Status:** measured (BENCHMARKS.md, 2026-10-22). At one turn per 15 s a
+  turn reaches the graph in a median 7.0 s through the proxy, almost all of it
+  the two parallel LLM calls; the rest of the pipeline adds about 1 s. At one
+  turn per 5 s the single improve lock batches turns two per pass and the
+  median doubles to 14 s.
+- **Open questions for hypotheses:** one LLM call per turn instead of two
+  (the summary call adds cost, not latency, since it runs in parallel);
+  extraction that sees recent turns and existing entities; a per-turn write
+  that does not wait behind the heavier improve stages for the lock.
+
 ## Parked: integration-layer ideas (other repo)
 
 These belong in `topoteretes/cognee-integrations`, not in this fork's core,

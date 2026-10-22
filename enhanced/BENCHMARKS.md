@@ -429,3 +429,44 @@ reproduced all 158 rankings of the benchmarked `hybrid_bm25_rr_minilm`
 uv run python -m enhanced.bench.run --name H3-shipped-check --profile haiku \
   --convs 5 --variants hybrid_bm25_rr_minilm,hybrid_precise
 ```
+
+## 2026-10-22 · R0 measurement: turn-to-graph latency (session bridge)
+
+Not a hypothesis decision; the baseline for real-time work. Upstream's
+session defaults (`CACHING`, `AUTO_FEEDBACK`, automatic improve, access
+control on, no debounce), haiku profile through the `claude -p` proxy, LoCoMo
+conv 0 session 1, first 10 utterances, each sent as
+`remember("Speaker: text", session_id=...)`. Probe code at `2108703f6`
+(`enhanced/bench/turn_probe.py`); the SHAs in the pace files are later
+results-only commits. A warm-up turn in its own dataset runs first.
+
+```bash
+uv run python -m enhanced.llm_proxy --port 8766 --cache <fresh dir> &
+uv run python -m enhanced.bench.turn_probe --name R0-pace15 --turns 10 --pace 15
+```
+
+| run | turn → graph median / max | cognify passes | LLM calls | `remember()` returns |
+|---|---|---|---|---|
+| `R0-pace15.json` (one turn / 15 s) | 7.0 / 9.3 s | 10 | 20 | 0.12-0.16 s |
+| `R0-pace5.json` (one turn / 5 s) | 14.0 / 20.9 s | 6 | 12 | 0.12-0.17 s |
+| `R0-burst.json` (cold start, then 9 turns in 5 s) | 25-35 s; turn 1 61 s | 2 | 4 + connection test | 34 s cold, then 0.2 s |
+
+- **Where the time goes:** each pass is one `add()` + `cognify()` of the
+  new turns, with two LLM calls (graph extraction and chunk summary) that run
+  in parallel. Warm, the non-LLM pipeline costs about 0.2 s before the calls
+  and 0.6-0.8 s after. The other improve stages took 0.2 s in total and made
+  no LLM calls here (no traces, no guidance to distill, no recall to analyse).
+- **Proxy share:** median proxy wall time per call 5.5 s against 1.9 s of API
+  time (`duration_api_ms`), so about 3.6 s of each pass is the proxy. With
+  direct API access the 15 s-pace latency would be roughly 3-4 s (estimate,
+  not measured).
+- **Queueing:** improve runs on a dataset take one lock. When turns arrive
+  faster than a pass completes (5 s pace, 7-12 s passes), later turns ask the
+  holder for another pass and are batched two at a time, so latency roughly
+  doubles but the bridge keeps up. In the burst, 9 of 10 runs lost the lock
+  and the holder ran one extra pass.
+- **Caveats:** in `R0-pace15` turns 1-2 hit the proxy cache (same prompts as
+  `R0-pace5`'s first two passes), so their 3.2 / 1.5 s are not comparable; the
+  median is over the rest. One run per pace, 10 turns, no recall traffic, so
+  `AUTO_FEEDBACK` and the read path are not in these numbers. `R0-burst`'s
+  graph count reads 0 because it was taken outside the dataset's database.
