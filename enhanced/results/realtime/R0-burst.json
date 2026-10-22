@@ -1,0 +1,963 @@
+{
+ "turns": [
+  "Caroline: Hey Mel! Good to see you! How have you been?",
+  "Melanie: Hey Caroline! Good to see you! I'm swamped with the kids & work. What's up with you? Anything new?",
+  "Caroline: I went to a LGBTQ support group yesterday and it was so powerful.",
+  "Melanie: Wow, that's cool, Caroline! What happened that was so awesome? Did you hear any inspiring stories?",
+  "Caroline: The transgender stories were so inspiring! I was so happy and thankful for all the support.",
+  "Melanie: Wow, love that painting! So cool you found such a helpful group. What's it done for you?",
+  "Caroline: The support group has made me feel accepted and given me courage to embrace myself.",
+  "Melanie: That's really cool. You've got guts. What now?",
+  "Caroline: Gonna continue my edu and check out career options, which is pretty exciting!",
+  "Melanie: Wow, Caroline! What kinda jobs are you thinkin' of? Anything that stands out?"
+ ],
+ "sent": [
+  8.861,
+  43.209,
+  44.765,
+  45.104,
+  45.295,
+  45.499,
+  47.25,
+  47.421,
+  47.578,
+  47.749
+ ],
+ "remember_returned_s": [
+  34.348,
+  1.556,
+  0.339,
+  0.191,
+  0.204,
+  1.751,
+  0.171,
+  0.157,
+  0.171,
+  0.158
+ ],
+ "turn_to_graph_s": [
+  61.26,
+  26.91,
+  25.36,
+  25.02,
+  35.77,
+  35.57,
+  33.82,
+  33.65,
+  33.49,
+  33.32
+ ],
+ "graph": {
+  "nodes": 0,
+  "edges": 0,
+  "node_types": {}
+ },
+ "events": [
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 41.283,
+   "t1": 41.365
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 43.313,
+   "t1": 43.34
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 44.745,
+   "t1": 44.826,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "feedback_weights",
+   "t0": 44.967,
+   "t1": 44.976
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 45.035,
+   "t1": 45.053
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 44.71,
+   "t1": 45.174,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 45.093,
+   "t1": 45.18,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 45.219,
+   "t1": 45.229
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 45.277,
+   "t1": 45.353,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 45.41,
+   "t1": 45.432
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 45.481,
+   "t1": 45.568,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 45.631,
+   "t1": 45.65
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 45.391,
+   "t1": 45.676
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 47.237,
+   "t1": 47.295,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 47.327,
+   "t1": 47.348
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 47.406,
+   "t1": 47.463,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 47.5,
+   "t1": 47.518
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 47.566,
+   "t1": 47.613,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 47.652,
+   "t1": 47.677
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 47.736,
+   "t1": 47.789,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "-",
+   "t0": 47.817,
+   "t1": 47.837
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 47.896,
+   "t1": 47.95,
+   "lock_held": true,
+   "rerun_requested": true,
+   "rerun_passes": 0,
+   "stages": [
+    [
+     "feedback_weights",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_session_qa",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "persist_agent_traces",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "extract_agent_context",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "distill_sessions",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "lock_held"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "lock_held"
+    ]
+   ]
+  },
+  {
+   "kind": "llm",
+   "label": "Respond to me with the following string: \"test\"",
+   "stage": "persist_session_qa",
+   "t0": 45.901,
+   "t1": 53.428
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 53.569,
+   "t1": 58.85
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 53.566,
+   "t1": 60.546
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 62.817,
+   "t1": 62.886
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 62.886,
+   "t1": 62.916
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 62.916,
+   "t1": 62.927
+  },
+  {
+   "kind": "embed",
+   "label": "4 texts",
+   "stage": "persist_session_qa",
+   "t0": 62.928,
+   "t1": 62.943
+  },
+  {
+   "kind": "embed",
+   "label": "3 texts",
+   "stage": "persist_session_qa",
+   "t0": 62.966,
+   "t1": 62.981
+  },
+  {
+   "kind": "embed",
+   "label": "21 texts",
+   "stage": "persist_session_qa",
+   "t0": 63.131,
+   "t1": 63.321
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 45.676,
+   "t1": 70.111
+  },
+  {
+   "kind": "persisted",
+   "count": 4,
+   "t1": 70.122
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 45.174,
+   "t1": 70.142,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 70.142,
+   "t1": 70.146,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 70.151,
+   "t1": 70.157,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 70.157,
+   "t1": 70.181,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "feedback_weights",
+   "stage": "feedback_weights",
+   "t0": 70.182,
+   "t1": 70.327,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "add",
+   "label": "add",
+   "stage": "persist_session_qa",
+   "t0": 70.448,
+   "t1": 70.58
+  },
+  {
+   "kind": "llm",
+   "label": "Summarize the chunk for retrieval. Output two sections only.",
+   "stage": "persist_session_qa",
+   "t0": 70.701,
+   "t1": 77.164
+  },
+  {
+   "kind": "llm",
+   "label": "You are a top-tier algorithm designed for extracting informa",
+   "stage": "persist_session_qa",
+   "t0": 70.698,
+   "t1": 77.308
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 77.376,
+   "t1": 77.433
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 77.433,
+   "t1": 77.474
+  },
+  {
+   "kind": "embed",
+   "label": "1 texts",
+   "stage": "persist_session_qa",
+   "t0": 77.474,
+   "t1": 77.486
+  },
+  {
+   "kind": "embed",
+   "label": "3 texts",
+   "stage": "persist_session_qa",
+   "t0": 77.486,
+   "t1": 77.497
+  },
+  {
+   "kind": "embed",
+   "label": "2 texts",
+   "stage": "persist_session_qa",
+   "t0": 77.538,
+   "t1": 77.545
+  },
+  {
+   "kind": "embed",
+   "label": "17 texts",
+   "stage": "persist_session_qa",
+   "t0": 77.847,
+   "t1": 77.978
+  },
+  {
+   "kind": "cognify",
+   "label": "cognify",
+   "stage": "persist_session_qa",
+   "t0": 70.58,
+   "t1": 81.059
+  },
+  {
+   "kind": "persisted",
+   "count": 10,
+   "t1": 81.066
+  },
+  {
+   "kind": "stage",
+   "label": "persist_session_qa",
+   "stage": "persist_session_qa",
+   "t0": 70.327,
+   "t1": 81.084,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "persist_agent_traces",
+   "stage": "persist_agent_traces",
+   "t0": 81.084,
+   "t1": 81.086,
+   "status": "already_completed",
+   "reason": "no_new_trace_steps"
+  },
+  {
+   "kind": "stage",
+   "label": "extract_agent_context",
+   "stage": "extract_agent_context",
+   "t0": 81.087,
+   "t1": 81.091,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "stage",
+   "label": "distill_sessions",
+   "stage": "distill_sessions",
+   "t0": 81.091,
+   "t1": 81.114,
+   "status": "completed",
+   "reason": null
+  },
+  {
+   "kind": "improve",
+   "label": "improve",
+   "stage": "-",
+   "t0": 43.19,
+   "t1": 81.122,
+   "lock_held": false,
+   "rerun_requested": false,
+   "rerun_passes": 1,
+   "stages": [
+    [
+     "feedback_weights",
+     "completed",
+     null
+    ],
+    [
+     "persist_session_qa",
+     "completed",
+     null
+    ],
+    [
+     "persist_agent_traces",
+     "already_completed",
+     "no_new_trace_steps"
+    ],
+    [
+     "extract_agent_context",
+     "completed",
+     null
+    ],
+    [
+     "distill_sessions",
+     "completed",
+     null
+    ],
+    [
+     "update_user_preferences",
+     "skipped",
+     "personalization_disabled"
+    ],
+    [
+     "build_truth_subspace",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "review_conflicts",
+     "skipped",
+     "opt_in_disabled"
+    ],
+    [
+     "global_context_index",
+     "skipped",
+     "opt_in_disabled"
+    ]
+   ]
+  }
+ ],
+ "config": {
+  "AUTO_FEEDBACK": "true",
+  "CACHING": "true",
+  "ENABLE_BACKEND_ACCESS_CONTROL": "true",
+  "IMPROVE_AUTO_ENABLED": "true",
+  "pace_s": 5.0,
+  "overrides": []
+ },
+ "git": {
+  "sha": "160c08df01b0d61adc6406a88639967659a379d4",
+  "dirty": false
+ }
+}
